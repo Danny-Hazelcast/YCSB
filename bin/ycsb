@@ -40,7 +40,9 @@ DATABASES = {
     "nosqldb"      : "com.yahoo.ycsb.db.NoSqlDbClient",
     "orientdb"     : "com.yahoo.ycsb.db.OrientDBClient",
     "redis"        : "com.yahoo.ycsb.db.RedisClient", 
-    "voldemort"    : "com.yahoo.ycsb.db.VoldemortClient", 
+    "voldemort"    : "com.yahoo.ycsb.db.VoldemortClient",
+    "hz26"         : "com.yahoo.ycsb.db.Hz26DbClient",
+    "hz32"         : "com.yahoo.ycsb.db.Hz32DbClient",
 }
 
 OPTIONS = {

@@ -76,6 +76,8 @@
     <module>redis</module>
     <module>voldemort</module>
     <module>distribution</module>
+      <module>Hz3-2</module>
+      <module>Hz2-6</module>
   </modules>
 
   <build>
