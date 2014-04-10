@@ -76,8 +76,11 @@
     <module>redis</module>
     <module>voldemort</module>
     <module>distribution</module>
-      <module>Hz3-2</module>
-      <module>Hz2-6</module>
+
+    <module>Hz3-2</module>
+    <module>Hz2-6</module>
+    <module>Hz3-1</module>
+    <module>Hz3-0</module>
   </modules>
 
   <build>
