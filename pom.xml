@@ -77,10 +77,10 @@
     <module>voldemort</module>
     <module>distribution</module>
 
-    <module>Hz3-2</module>
-    <module>Hz2-6</module>
-    <module>Hz3-1</module>
-    <module>Hz3-0</module>
+    <module>Hz32</module>
+    <module>Hz26</module>
+    <module>Hz31</module>
+    <module>Hz30</module>
   </modules>
 
   <build>
