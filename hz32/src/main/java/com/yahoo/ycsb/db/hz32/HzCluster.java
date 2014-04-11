@@ -19,9 +19,7 @@ public class HzCluster {
     public static void main(String args[]){
 
         for(int i=0; i<nodesPerJvm; i++){
-
             nodes.add(Hazelcast.newHazelcastInstance());
-
         }
 
         final Random random = new Random();
