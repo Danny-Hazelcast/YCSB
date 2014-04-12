@@ -13,10 +13,15 @@ import java.util.Random;
  */
 public class HzCluster {
 
-    public static final int nodesPerJvm = 1;
+    public static int nodesPerJvm = 1;
     public static final List<HazelcastInstance> nodes = new ArrayList();
 
     public static void main(String args[]){
+
+        if(args!=null && args.length > 0){
+            System.err.println("nodesPerJvm ="+args[0]);
+            nodesPerJvm = Integer.parseInt(args[0]);
+        }
 
         for(int i=0; i<nodesPerJvm; i++){
             nodes.add(Hazelcast.newHazelcastInstance());

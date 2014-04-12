@@ -14,11 +14,14 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A database interface layer for Hazelcast.
  */
 public class HzDbClient extends DB {
+
+    public static AtomicInteger insertCount = new AtomicInteger(0);
 
     public Random random = new Random();
 
@@ -35,11 +38,16 @@ public class HzDbClient extends DB {
 	@Override
 	public void init() throws DBException {
 
+
         System.err.println("==>> "+getClass().getName() );
 
         if(doInit.compareAndSet(true, false)){
 
             Properties prop = getProperties();
+
+            String property = prop.getProperty("recordcount", "1");
+            System.err.println("==>> "+property );
+
 
             String nodesPerJVM_str = prop.getProperty("hazelcastDBClient.nodesPerJVM", "1");
             String clientNodes_str = prop.getProperty("hazelcastDbClient.clientNodes", "true");
@@ -70,6 +78,7 @@ public class HzDbClient extends DB {
 	@Override
 	public void cleanup() throws DBException {
 		//Hazelcast.shutdownAll();
+        System.err.println("==>>"+insertCount.get());
 	}
 
 	@Override
@@ -103,6 +112,7 @@ public class HzDbClient extends DB {
 	@Override
 	public int update(String table, String key, HashMap<String, ByteIterator> values) {
 
+
         IMap<String, HashMap<String, String> > map = nodez.get(random.nextInt(nodez.size())).getMap(table);
         HashMap<String, String> row = map.get(key);
 
@@ -117,6 +127,8 @@ public class HzDbClient extends DB {
 
 	@Override
 	public int insert(String table, String key, HashMap<String, ByteIterator> values) {
+
+        insertCount.incrementAndGet();
 
         IMap<String, HashMap<String, String> > map = nodez.get(random.nextInt(nodez.size())).getMap(table);
 

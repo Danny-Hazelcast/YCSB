@@ -38,19 +38,27 @@ function port {
 
 function initCluster {
     VERSION=$1
+    JVMS=$2
+    NODES_PER_JVM=$3
+
 
     for machine in $MACHINES
     do
-        #repeat for number of JVMS per machine
-        ADDRESS=$( address ${machine} )
+        ADDRESS=$( addregss ${machine} )
 	    PORT=$( port ${machine} )
 
-        ssh ${USER}@${ADDRESS} -p ${PORT} "java -jar ${TARGET_DIR}/${VERSION}/target/*.jar > ${TARGET_DIR}/node.out" &
+        #repeat for number of JVMS per machine
+        i=0
+        while [ $i -lt $JVMS ]
+        do
+            ssh ${USER}@${ADDRESS} -p ${PORT} "java -jar ${TARGET_DIR}/${VERSION}/target/*.jar ${NODES_PER_JVM} > ${TARGET_DIR}/${VERSION}/node${i}.out" &
+            echo "Starting on ${machine} JVM${i} with ${NODES_PER_JVM} Nodes, at version ${VERSION}"
 
-        echo "Starting ${VERSION} Node(s) on ${machine}"
+            i=$[$i+1]
+        done
     done
 }
 
 
-initCluster $HZ32
-echo "Waiting for Cluster formation"
+echo "Starting Cluster formation"
+initCluster $HZ32 4 2

@@ -71,3 +71,5 @@ for machine in $MACHINES
 do
 	install $machine "ycsb.zip"
 done
+
+rm -f "ycsb.zip"

@@ -38,18 +38,31 @@ function port {
 
 
 # load phse on multi machiens needs propertys to be set to div up the key load to each machien,
-# just keeping it singel jvm and thread per machien on the load phase, as this tool ycsb aint that good at this load phase more suted to trad database stuff
+# ThreadCount in workLoad file
 function runLoadPhase {
     VERSION=$1
-    WORKLOAD=$2
-    DB_CLIENT_PROPS=$3
+    DB_CLIENT_PROPS=$2
+    WORKLOAD=$3
+    MAX_DB_CLIENTS=$4
+    INSERTS_PER_CLIENT=$5
 
+    START_IDX=0;
     for machine in $MACHINES
     do
         ADDRESS=$( address ${machine} )
 	    PORT=$( port ${machine} )
-        ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb load ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -s -threads 1 > ${TARGET_DIR}/${VERSION}/${WORKLOAD}-loadResult.txt" &
-        echo "Starting Load phase of ${WORKLOAD} from ${machine} JVM 1"
+
+	    #repeat for number of DB-Clients per machine
+        i=0
+        while [ $i -lt $MAX_DB_CLIENTS ]
+        do
+
+            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb load ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -p insertstart=${START_IDX} -p insertcount=${INSERTS_PER_CLIENT} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}{WORKLOAD}-loadResult.txt" &
+            echo "Starting on ${machine} DB-Client ${i} Load phase of ${WORKLOAD} inserting ${INSERTS_PER_CLIENT} for idx ${START_IDX}"
+            START_IDX=$[$START_IDX+$INSERTS_PER_CLIENT]
+
+            i=$[$i+1]
+        done
     done
 }
 
@@ -68,7 +81,7 @@ function runTransactionPhase {
     done
 }
 
-runLoadPhase $HZ32 "workloada" "2client.properties"
+runLoadPhase $HZ32 5 "workloada" "2client.properties" 1000
 echo "Waiting for Load Phase completion"
 sleep 30s
 
