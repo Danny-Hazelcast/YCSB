@@ -41,9 +41,9 @@ function port {
 # ThreadCount in workLoad file
 function runLoadPhase {
     VERSION=$1
-    DB_CLIENT_PROPS=$2
+    MAX_DB_CLIENTS=$2
     WORKLOAD=$3
-    MAX_DB_CLIENTS=$4
+    DB_CLIENT_PROPS=$4
     INSERTS_PER_CLIENT=$5
 
     START_IDX=0;
@@ -68,21 +68,30 @@ function runLoadPhase {
 
 function runTransactionPhase {
     VERSION=$1
-    WORKLOAD=$2
-    DB_CLIENT_PROPS=$3
+    MAX_DB_CLIENTS=$2
+    WORKLOAD=$3
+    DB_CLIENT_PROPS=$4
 
     for machine in $MACHINES
     do
-        #repeat for number of JVMS per machine to make load
         ADDRESS=$( address ${machine} )
 	    PORT=$( port ${machine} )
-        ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb run ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -s > ${TARGET_DIR}/${VERSION}/${WORKLOAD}-runResult.txt" &
-        echo "Starting Transaction phase of ${WORKLOAD} from ${machine} JVM 1"
+
+	    #repeat for number of DB-Clients per machine
+        i=0
+        while [ $i -lt $MAX_DB_CLIENTS ]
+        do
+
+            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb run ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}{WORKLOAD}-runResult.txt" &
+            echo "Starting on ${machine} DB-Client ${i} Transacton phase of ${WORKLOAD}"
+
+            i=$[$i+1]
+         done
     done
 }
 
-runLoadPhase $HZ32 5 "workloada" "2client.properties" 1000
+runLoadPhase $HZ32 4 "workloada" "2client.properties" 1000
 echo "Waiting for Load Phase completion"
 sleep 30s
 
-runTransactionPhase $HZ32 "workloada" "2client.properties"
+runTransactionPhase $HZ32 4 "workloada" "2client.properties"
