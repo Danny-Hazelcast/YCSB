@@ -35,10 +35,10 @@ function zipCurrentDir {
 
 function install {
 	MACHINE=$1
+	ZIP_NAME=$2
+
 	ADDRESS=$( address ${MACHINE} )
 	PORT=$( port ${MACHINE} )
-
-    ZIP_NAME=$2
 
 	echo ===============================================================
 	echo Installing YCSB on ${MACHINE}
