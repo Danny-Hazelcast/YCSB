@@ -38,7 +38,6 @@ public class HzDbClient extends DB {
 	@Override
 	public void init() throws DBException {
 
-
         System.err.println("==>> "+getClass().getName() );
 
         if(doInit.compareAndSet(true, false)){
@@ -78,7 +77,6 @@ public class HzDbClient extends DB {
 	@Override
 	public void cleanup() throws DBException {
 		//Hazelcast.shutdownAll();
-        System.err.println("==>>"+insertCount.get());
 	}
 
 	@Override
