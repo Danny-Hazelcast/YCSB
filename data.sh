@@ -18,7 +18,14 @@ HZ32="hz32"
 VERSION=${HZ32}
 
 
-WORKLOAD="workloadZ"
+WORKLOADa="workloada"
+WORKLOADb="workloadb"
+WORKLOADc="workloadc"
+WORKLOADd="workloadd"
+WORKLOADe="workloade"
+WORKLOADf="workloadf"
+WORKLOADZ="workloadZ"
+WORKLOAD=${WORKLOADZ}
 
 
 CLUSTER_JVMS_PER_BOX=4
@@ -26,3 +33,4 @@ CLUSTER_NODES_PER_JVM=2
 
 
 DB_CLIENTS_PER_BOX=8
+THREADS_PER_DB_CLIENT=4

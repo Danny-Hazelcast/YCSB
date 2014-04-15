@@ -21,8 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class HzDbClient extends DB {
 
-    public static AtomicInteger insertCount = new AtomicInteger(0);
-
     public Random random = new Random();
 
 	public static final int OK = 0;
@@ -125,8 +123,6 @@ public class HzDbClient extends DB {
 
 	@Override
 	public int insert(String table, String key, HashMap<String, ByteIterator> values) {
-
-        insertCount.incrementAndGet();
 
         IMap<String, HashMap<String, String> > map = nodez.get(random.nextInt(nodez.size())).getMap(table);
 
