@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by danny on 4/8/14.
- */
 public class HzCluster {
 
     public static int nodesPerJvm = 1;
@@ -31,7 +28,7 @@ public class HzCluster {
 
         while(true){
             try {
-                Thread.sleep(2000);
+                Thread.sleep(8000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

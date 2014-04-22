@@ -9,8 +9,6 @@ import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.StringByteIterator;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,14 +30,18 @@ public class HzDbClient extends DB {
     public static final AtomicBoolean doInit = new AtomicBoolean(true);
     public static final List<HazelcastInstance> nodez = new ArrayList();
 
-    @Override
-    public void init() throws DBException {
+	@Override
+	public void init() throws DBException {
 
         System.err.println("==>> "+getClass().getName() );
 
         if(doInit.compareAndSet(true, false)){
 
             Properties prop = getProperties();
+
+            String property = prop.getProperty("recordcount", "1");
+            System.err.println("==>> "+property );
+
 
             String nodesPerJVM_str = prop.getProperty("hazelcastDBClient.nodesPerJVM", "1");
             String clientNodes_str = prop.getProperty("hazelcastDbClient.clientNodes", "true");
@@ -74,16 +76,6 @@ public class HzDbClient extends DB {
 
 	@Override
 	public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result) {
-        /*
-        System.err.println("read");
-        System.err.println(table);
-        System.err.println(key);
-        System.err.println(fields);
-        for (Map.Entry<String, ByteIterator> entry : result.entrySet()) {
-            System.err.println(entry.getKey());
-        }
-        System.err.println();
-        */
 
         IMap<String, HashMap<String, String> > map = nodez.get(random.nextInt(nodez.size())).getMap(table);
         HashMap<String, String> row = map.get(key);
@@ -112,14 +104,7 @@ public class HzDbClient extends DB {
 
 	@Override
 	public int update(String table, String key, HashMap<String, ByteIterator> values) {
-        /*
-        System.err.println("update");
-        System.err.println(table);
-        for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
-            System.err.println(key+" "+entry.getKey());
-        }
-        System.err.println();
-        */
+
 
         IMap<String, HashMap<String, String> > map = nodez.get(random.nextInt(nodez.size())).getMap(table);
         HashMap<String, String> row = map.get(key);
@@ -135,13 +120,6 @@ public class HzDbClient extends DB {
 
 	@Override
 	public int insert(String table, String key, HashMap<String, ByteIterator> values) {
-        /*
-        System.err.println("insert");
-        for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
-            System.err.println(key+" "+entry.getKey());
-        }
-        System.err.println();
-        */
 
         IMap<String, HashMap<String, String> > map = nodez.get(random.nextInt(nodez.size())).getMap(table);
 

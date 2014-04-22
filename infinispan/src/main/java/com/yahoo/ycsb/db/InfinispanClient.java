@@ -68,7 +68,7 @@ public class InfinispanClient extends DB {
          if (row != null) {
             result.clear();
             if (fields == null || fields.isEmpty()) {
-		StringByteIterator.putAllAsByteIterators(result, row);
+		        StringByteIterator.putAllAsByteIterators(result, row);
             } else {
 	       for (String field : fields) result.put(field, new StringByteIterator(row.get(field)));
             }
@@ -118,6 +118,7 @@ public class InfinispanClient extends DB {
 
          return OK;
       } catch (Exception e) {
+         System.err.println(e);
          return ERROR;
       }
    }

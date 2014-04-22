@@ -4,25 +4,36 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
-/**
- * Created by danny on 4/8/14.
- */
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class HzCluster {
+
+    public static int nodesPerJvm = 1;
+    public static final List<HazelcastInstance> nodes = new ArrayList();
 
     public static void main(String args[]){
 
-        HazelcastInstance node1 = Hazelcast.newHazelcastInstance();
-        HazelcastInstance node2 = Hazelcast.newHazelcastInstance();
+        if(args!=null && args.length > 0){
+            System.err.println("nodesPerJvm ="+args[0]);
+            nodesPerJvm = Integer.parseInt(args[0]);
+        }
 
+        for(int i=0; i<nodesPerJvm; i++){
+            nodes.add(Hazelcast.newHazelcastInstance());
+        }
+
+        final Random random = new Random();
 
         while(true){
             try {
-                Thread.sleep(2000);
+                Thread.sleep(8000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            IMap map = node1.getMap("usertable");
+            IMap map = nodes.get(random.nextInt(nodesPerJvm)).getMap("usertable");
 
             System.out.println(map.getName()+" size = "+map.size());
         }

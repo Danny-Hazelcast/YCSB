@@ -6,7 +6,7 @@
       xmlns="urn:infinispan:config:5.0">
 
    <global>
-      <transport clusterName="x" />
+      <transport clusterName="clustered" />
    </global>
 
    <default>

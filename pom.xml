@@ -81,6 +81,8 @@
     <module>Hz26</module>
     <module>Hz31</module>
     <module>Hz30</module>
+      <module>infini2</module>
+      <module>ResultCombine</module>
   </modules>
 
   <build>

@@ -121,7 +121,7 @@ function runLoadPhase {
         while [ $i -lt $DB_CLIENTS_PER_BOX ]
         do
 
-            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb load ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -p insertstart=${START_IDX} -p insertcount=${INSERTS_PER_CLIENT} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-loadResult.txt 2>${TARGET_DIR}/${VERSION}/dbClient${i}.out" &
+            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb load ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -p insertstart=${START_IDX} -p insertcount=${INSERTS_PER_CLIENT} -p recordcount=${TOTAL_RECORDS} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-loadResult.txt 2>${TARGET_DIR}/${VERSION}/dbClient${i}.out" &
             echo "Starting on ${machine} DB-Client ${i} Load phase of ${WORKLOAD} inserting ${INSERTS_PER_CLIENT} for idx ${START_IDX}"
             START_IDX=$[$START_IDX+$INSERTS_PER_CLIENT]
 
@@ -147,7 +147,7 @@ function runTransactionPhase {
         while [ $i -lt $DB_CLIENTS_PER_BOX ]
         do
 
-            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb run ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-runResult.txt 2>${TARGET_DIR}/${VERSION}/dbClient${i}.out" &
+            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb run ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -p recordcount=${TOTAL_RECORDS} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-runResult.txt 2>${TARGET_DIR}/${VERSION}/dbClient${i}.out" &
             echo "Starting on ${machine} DB-Client ${i} Transacton phase of ${WORKLOAD}"
 
             i=$[$i+1]
@@ -215,6 +215,14 @@ function downLoadResults {
         done
         box=$[$box+1]
     done
+}
+
+
+function combineResults {
+    DESTINATION_DIR=$1
+    FILE_NAMES=$2
+
+    java -jar ResultCombine/target/ResultCombine-0.1.4.jar ${DESTINATION_DIR} ${FILE_NAMES} > ${DESTINATION_DIR}/${FILE_NAMES}report.csv
 }
 
 
