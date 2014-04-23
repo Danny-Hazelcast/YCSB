@@ -194,7 +194,6 @@ function tailDbClientOutput {
     VERSION=$1
     DB_CLIENTS_PER_BOX=$2
 
-
     for machine in $MACHINES
     do
         ADDRESS=$( address ${machine} )
