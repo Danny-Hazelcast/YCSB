@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 
-public class resultCombine {
+public class ResultCombine {
 
     public static ListMultimap<String, Double> data = ArrayListMultimap.create();
 
@@ -33,12 +33,17 @@ public class resultCombine {
                 e.printStackTrace();
             }
         }
+
         processData();
-        printData();
+        if(fileNames.equals("runResult")){
+            printRun();
+        }
+        else{
+            printLoad();
+        }
     }
 
     public static Collection<File> getfileNames(String path, String names){
-        //File dir = new File("./result");
         File dir = new File(path);
 
 
@@ -56,8 +61,6 @@ public class resultCombine {
     public static void addDataFrom(BufferedReader in) throws IOException {
         String line;
         while ( (line = in.readLine()) !=null ) {
-
-            System.out.println(line);
 
             StringTokenizer st = new StringTokenizer(line, ",", false);
 
@@ -79,18 +82,28 @@ public class resultCombine {
         }
     }
 
-
-    public static void printData(){
+    public static void printOverall(){
 
         String key = "[OVERALL] RunTime(ms)";
-        System.out.println(key+", "+data.get(key));
+        System.out.println(key+", "+data.get(key).get(0));
 
         key = "[OVERALL] Throughput(ops/sec)";
-        System.out.println(key+", "+data.get(key));
+        System.out.println(key+", "+data.get(key).get(0));
+    }
+
+    public static void printRun(){
+
+        printOverall();
 
         printData("[UPDATE]");
         printData("[READ]");
-        //printData("[INSERT]");
+    }
+
+    public static void printLoad(){
+
+        printOverall();
+
+        printData("[INSERT]");
     }
 
     public static void printData(String type){

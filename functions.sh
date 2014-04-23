@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/expect -d
 . data.sh
 
 function address {
@@ -62,6 +62,12 @@ function initCluster {
     JVMS_PER_BOX=$2
     NODES_PER_JVM=$3
 
+    TOTAL_NODES=$[$NODES_PER_JVM*$JVMS_PER_BOX*$BOX_COUNT]
+
+    echo "total nodes = ${TOTAL_NODES}"
+
+    count=0
+    lastone=$[$BOX_COUNT*$JVMS_PER_BOX-1]
 
     for machine in $MACHINES
     do
@@ -72,10 +78,32 @@ function initCluster {
         i=0
         while [ $i -lt $JVMS_PER_BOX ]
         do
-            ssh ${USER}@${ADDRESS} -p ${PORT} "java -jar ${TARGET_DIR}/${VERSION}/target/*.jar ${NODES_PER_JVM} > ${TARGET_DIR}/${VERSION}/node${i}.out 2>&1" &
             echo "Starting on ${machine} JVM${i} with ${NODES_PER_JVM} Nodes, at version ${VERSION}"
+            if [ ${count} == ${lastone} ]; then
+
+                echo "starting last one ${count}"
+
+                expect -c '
+                set timeout 90
+                spawn ssh '"${USER}"'@'"${ADDRESS}"' -p '"${PORT}"' "java -jar '"${TARGET_DIR}"'/'"${VERSION}"'/target/*.jar '"${NODES_PER_JVM}"' '"${TOTAL_NODES}"'"
+                expect {
+                "===>>CLUSTERED<<===" { exit 22}
+                timeout {exit -1}
+                }
+                '
+
+                if [ ${?} == 22 ]; then
+                    echo "CLUSTERED"
+                else
+                    echo "!!! FAILED TO FORM THE FULL ${TOTAL_NODES} NODE CLUSTER !!!"
+                fi
+
+            else
+                ssh ${USER}@${ADDRESS} -p ${PORT} "java -jar ${TARGET_DIR}/${VERSION}/target/*.jar ${NODES_PER_JVM} ${TOTAL_NODES} > ${TARGET_DIR}/${VERSION}/node${i}.out 2>&1" &
+            fi
 
             i=$[$i+1]
+            count=$[$count+1]
         done
     done
 }
@@ -110,6 +138,8 @@ function runLoadPhase {
     DB_CLIENT_PROPS=$4
     INSERTS_PER_CLIENT=$5
 
+    echo "total inserts=${TOTAL_RECORDS}"
+
     START_IDX=0;
     for machine in $MACHINES
     do
@@ -128,6 +158,8 @@ function runLoadPhase {
             i=$[$i+1]
         done
     done
+    wait
+    echo "=====Load Phase Complete====="
 }
 
 
@@ -153,6 +185,8 @@ function runTransactionPhase {
             i=$[$i+1]
          done
     done
+    wait
+    echo "=====Run Phase Complete====="
 }
 
 
@@ -220,9 +254,11 @@ function downLoadResults {
 
 function combineResults {
     DESTINATION_DIR=$1
-    FILE_NAMES=$2
+    VERSION=$2
+    FILE_NAMES=$3
 
-    java -jar ResultCombine/target/ResultCombine-0.1.4.jar ${DESTINATION_DIR} ${FILE_NAMES} > ${DESTINATION_DIR}/${FILE_NAMES}report.csv
+    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${DESTINATION_DIR}/${VERSION} "loadResult" > ${DESTINATION_DIR}/${VERSION}/loadReport.csv
+    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${DESTINATION_DIR}/${VERSION} "runResult"  > ${DESTINATION_DIR}/${VERSION}/runReport.csv
 }
 
 
@@ -235,4 +271,5 @@ function killAllJava {
 
         ssh ${USER}@${ADDRESS} -p ${PORT} "killall -9 java"
     done
+
 }

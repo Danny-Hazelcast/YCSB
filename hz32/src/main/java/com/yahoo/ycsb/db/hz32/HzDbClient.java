@@ -75,7 +75,9 @@ public class HzDbClient extends DB {
 	@Override
 	public void cleanup() throws DBException {
 		//Hazelcast.shutdownAll();
-	}
+        System.err.println("CLEANUP END" );
+
+    }
 
 	@Override
 	public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result) {
