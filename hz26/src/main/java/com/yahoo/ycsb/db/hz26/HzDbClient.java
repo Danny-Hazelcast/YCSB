@@ -40,7 +40,7 @@ public class HzDbClient extends DB {
             Properties prop = getProperties();
 
             String property = prop.getProperty("recordcount", "1");
-            System.err.println("==>> "+property );
+            System.err.println("==>> " + property);
 
 
             String nodesPerJVM_str = prop.getProperty("hazelcastDBClient.nodesPerJVM", "1");
@@ -72,7 +72,9 @@ public class HzDbClient extends DB {
 	@Override
 	public void cleanup() throws DBException {
 		//Hazelcast.shutdownAll();
-	}
+        System.err.println("CLEANUP END" );
+
+    }
 
 	@Override
 	public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result) {

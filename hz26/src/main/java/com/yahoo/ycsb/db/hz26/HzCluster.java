@@ -16,12 +16,37 @@ public class HzCluster {
     public static void main(String args[]){
 
         if(args!=null && args.length > 0){
-            System.err.println("nodesPerJvm ="+args[0]);
+            System.err.println("nodesPerJvm="+args[0]);
             nodesPerJvm = Integer.parseInt(args[0]);
         }
 
         for(int i=0; i<nodesPerJvm; i++){
             nodes.add(Hazelcast.newHazelcastInstance());
+        }
+
+
+        if(args.length==2){
+            int targetSZ = Integer.parseInt(args[1]);
+            System.err.println("Target Cluster Size="+targetSZ);
+
+            boolean go=true;
+            while(go){
+
+                try {
+                    Thread.sleep(8000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                for(HazelcastInstance i : nodes ){
+                    int clusterSZ = i.getCluster().getMembers().size();
+                    if(clusterSZ == targetSZ){
+                        System.err.println("===>>CLUSTERED<<===");
+                        go=false;
+                        break;
+                    }
+                }
+            }
         }
 
         final Random random = new Random();

@@ -1,5 +1,5 @@
 #!/usr/bin/expect -d
-. data.sh
+. golbal.sh
 
 function address {
 	MACHINE=$1
@@ -37,19 +37,19 @@ function install {
 	MACHINE=$1
 	ZIP_NAME=$2
 
-	ADDRESS=$( address ${MACHINE} )
-	PORT=$( port ${MACHINE} )
+	address=$( address ${MACHINE} )
+	port=$( port ${MACHINE} )
 
 	echo ===============================================================
 	echo Installing YCSB on ${MACHINE}
 	echo ===============================================================
 
-	ssh ${USER}@${ADDRESS} -p ${PORT} "rm -fr ${TARGET_DIR}"
-	ssh ${USER}@${ADDRESS} -p ${PORT} "mkdir ${TARGET_DIR}"
+	ssh ${USER}@${address} -p ${port} "rm -fr ${BASE_DIR}"
+	ssh ${USER}@${address} -p ${port} "mkdir ${BASE_DIR}"
 
-	scp -P ${PORT} ${ZIP_NAME} ${USER}@${ADDRESS}:${TARGET_DIR}/${ZIP_NAME}
+	scp -P ${port} ${ZIP_NAME} ${USER}@${address}:${BASE_DIR}/${ZIP_NAME}
 	echo Unzipping ${ZIP_NAME}
-	ssh ${USER}@${ADDRESS} -p ${PORT}  "unzip -q ${TARGET_DIR}/${ZIP_NAME} -d ${TARGET_DIR}"
+	ssh ${USER}@${address} -p ${port}  "unzip -q ${BASE_DIR}/${ZIP_NAME} -d ${BASE_DIR}"
 
 	echo ===============================================================
 	echo Finished installing YCSB on ${MACHINE}
@@ -58,34 +58,32 @@ function install {
 
 
 function initCluster {
-    VERSION=$1
-    JVMS_PER_BOX=$2
-    NODES_PER_JVM=$3
+    version=$1
+    jvmsPerBox=$2
+    nodesPerBox=$3
 
-    TOTAL_NODES=$[$NODES_PER_JVM*$JVMS_PER_BOX*$BOX_COUNT]
+    totalNodes=$[jvmsPerBox*nodesPerBox]
+    lastOne=$[${#MACHINES[@]}*jvmsPerBox-1]
 
-    echo "total nodes = ${TOTAL_NODES}"
+    echo "totalNodes = ${totalNodes}"
 
     count=0
-    lastone=$[$BOX_COUNT*$JVMS_PER_BOX-1]
-
-    for machine in $MACHINES
+    for machine in ${MACHINES}
     do
-        ADDRESS=$( address ${machine} )
-	    PORT=$( port ${machine} )
+        address=$( address ${machine} )
+	    port=$( port ${machine} )
 
-        #repeat for number of JVMS per machine
         i=0
-        while [ $i -lt $JVMS_PER_BOX ]
+        while [ $i -lt ${jvmsPerBox} ]
         do
-            echo "Starting on ${machine} JVM${i} with ${NODES_PER_JVM} Nodes, at version ${VERSION}"
-            if [ ${count} == ${lastone} ]; then
+            echo "Starting on ${machine} JVM${i} with ${nodesPerBox} Nodes, at version ${version}"
+            if [ ${count} == ${lastOne} ]; then
 
                 echo "starting last one ${count}"
 
                 expect -c '
                 set timeout 90
-                spawn ssh '"${USER}"'@'"${ADDRESS}"' -p '"${PORT}"' "java -jar '"${TARGET_DIR}"'/'"${VERSION}"'/target/*.jar '"${NODES_PER_JVM}"' '"${TOTAL_NODES}"'"
+                spawn ssh '"${USER}"'@'"${address}"' -p '"${port}"' "java -jar '"${BASE_DIR}"'/'"${version}"'/target/*.jar '"${nodesPerBox}"' '"${totalNodes}"'"
                 expect {
                 "===>>CLUSTERED<<===" { exit 22}
                 timeout {exit -1}
@@ -93,118 +91,142 @@ function initCluster {
                 '
 
                 if [ ${?} == 22 ]; then
-                    echo "CLUSTERED"
+                    echo "=====CLUSTERED==== version ${version}"
+                    return 0
                 else
-                    echo "!!! FAILED TO FORM THE FULL ${TOTAL_NODES} NODE CLUSTER !!!"
+                    echo "!!! FAILED TO FORM THE FULL ${totalNodes} NODE CLUSTER !!!  version ${version}"
+                    return 2
                 fi
 
             else
-                ssh ${USER}@${ADDRESS} -p ${PORT} "java -jar ${TARGET_DIR}/${VERSION}/target/*.jar ${NODES_PER_JVM} ${TOTAL_NODES} > ${TARGET_DIR}/${VERSION}/node${i}.out 2>&1" &
+                ssh ${USER}@${address} -p ${port} "java -jar ${BASE_DIR}/${version}/target/*.jar ${nodesPerBox} ${totalNodes} > ${BASE_DIR}/${version}/node${i}.out 2>&1" &
             fi
 
             i=$[$i+1]
             count=$[$count+1]
         done
     done
+    echo "SOME THING REALLY WENT WRONG HEAR"
+    return 2
 }
 
 
-function tailClusterOutput {
-    VERSION=$1
-    JVMS_PER_BOX=$2
+function loadPhase {
+    version=$1
+    clientsPerBox=$2
+    insertsPerClient=$3
+    clientProps=$4
+    workload=$5
 
+    totalRecords=$[${#MACHINES[@]}*clientsPerBox*insertsPerClient]
+    echo "=====Running Load Phase====="
+    echo "totalRecords to insert=${totalRecords}"
+
+    pids=()
+    startIdx=0;
     for machine in $MACHINES
     do
-        ADDRESS=$( address ${machine} )
-	    PORT=$( port ${machine} )
+        address=$( address ${machine} )
+	    port=$( port ${machine} )
 
-        #repeat for number of JVMS per machine
         i=0
-        while [ $i -lt $JVMS_PER_BOX ]
+        while [ $i -lt $clientsPerBox ]
         do
-            ssh ${USER}@${ADDRESS} -p ${PORT} "tail -f ${TARGET_DIR}/${VERSION}/node${i}.out" &
-            echo "tailling output of ${machine} JVM${i} with, at version ${VERSION}"
+            ssh ${USER}@${address} -p ${port} "./${BASE_DIR}/bin/ycsb load ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p insertstart=${startIdx} -p insertcount=${insertsPerClient} -p recordcount=${totalRecords} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-loadResult.txt 2>${BASE_DIR}/${version}/dbClient${i}.out" &
+            pids+=($!)
+            echo "Starting on ${machine} DB-Client ${i} Load phase of ${workload} inserting ${insertsPerClient} for idx ${startIdx} version ${version}"
+            startIdx=$[$startIdx+$insertsPerClient]
 
             i=$[$i+1]
         done
     done
-}
 
-
-function runLoadPhase {
-    VERSION=$1
-    DB_CLIENTS_PER_BOX=$2
-    WORKLOAD=$3
-    DB_CLIENT_PROPS=$4
-    INSERTS_PER_CLIENT=$5
-
-    echo "total inserts=${TOTAL_RECORDS}"
-
-    START_IDX=0;
-    for machine in $MACHINES
+    for id in $pids
     do
-        ADDRESS=$( address ${machine} )
-	    PORT=$( port ${machine} )
-
-	    #repeat for number of DB-Clients per machine
-        i=0
-        while [ $i -lt $DB_CLIENTS_PER_BOX ]
-        do
-
-            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb load ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -p insertstart=${START_IDX} -p insertcount=${INSERTS_PER_CLIENT} -p recordcount=${TOTAL_RECORDS} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-loadResult.txt 2>${TARGET_DIR}/${VERSION}/dbClient${i}.out" &
-            echo "Starting on ${machine} DB-Client ${i} Load phase of ${WORKLOAD} inserting ${INSERTS_PER_CLIENT} for idx ${START_IDX}"
-            START_IDX=$[$START_IDX+$INSERTS_PER_CLIENT]
-
-            i=$[$i+1]
-        done
+       wait ${id}
     done
-    wait
+
     echo "=====Load Phase Complete====="
 }
 
 
-function runTransactionPhase {
-    VERSION=$1
-    DB_CLIENTS_PER_BOX=$2
-    WORKLOAD=$3
-    DB_CLIENT_PROPS=$4
+function transactionPhase {
+    version=$1
+    clientsPerBox=$2
+    insertsPerClient=$3
+    clientProps=$4
+    workload=$5
 
+    totalRecords=$[${#MACHINES[@]}*clientsPerBox*insertsPerClient]
+
+
+    echo "=====Running work Phase====="
+    pids=()
     for machine in $MACHINES
     do
-        ADDRESS=$( address ${machine} )
-	    PORT=$( port ${machine} )
+        address=$( address ${machine} )
+	    port=$( port ${machine} )
 
 	    #repeat for number of DB-Clients per machine
         i=0
-        while [ $i -lt $DB_CLIENTS_PER_BOX ]
+        while [ $i -lt $clientsPerBox ]
         do
 
-            ssh ${USER}@${ADDRESS} -p ${PORT} "./${TARGET_DIR}/bin/ycsb run ${VERSION} -P ${TARGET_DIR}/workloads/${WORKLOAD} -P ${TARGET_DIR}/${DB_CLIENT_PROPS} -p recordcount=${TOTAL_RECORDS} -s > ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-runResult.txt 2>${TARGET_DIR}/${VERSION}/dbClient${i}.out" &
-            echo "Starting on ${machine} DB-Client ${i} Transacton phase of ${WORKLOAD}"
+            ssh ${USER}@${address} -p ${port} "./${BASE_DIR}/bin/ycsb run ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p recordcount=${totalRecords} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-runResult.txt 2>${BASE_DIR}/${version}/dbClient${i}.out" &
+            pids+=($!)
+            echo "Starting on ${machine} DB-Client ${i} Transacton phase of ${workload} version ${version}"
 
             i=$[$i+1]
          done
     done
-    wait
-    echo "=====Run Phase Complete====="
+
+    for id in $pids
+    do
+       wait ${id}
+    done
+
+    echo "=====Work Phase Complete====="
+}
+
+
+
+function tailClusterOutput {
+    version=$1
+    jvmsPerBox=$2
+
+    for machine in $MACHINES
+    do
+        address=$( address ${machine} )
+	    port=$( port ${machine} )
+
+        #repeat for number of JVMS per machine
+        i=0
+        while [ $i -lt $jvmsPerBox ]
+        do
+            ssh ${USER}@${address} -p ${port} "tail -f ${BASE_DIR}/${version}/node${i}.out" &
+            echo "tailling output of ${machine} JVM${i} with, at version ${version}"
+
+            i=$[$i+1]
+        done
+    done
 }
 
 
 function tailDbClientOutput {
-    VERSION=$1
-    DB_CLIENTS_PER_BOX=$2
+    version=$1
+    clientsPerBox=$2
 
     for machine in $MACHINES
     do
-        ADDRESS=$( address ${machine} )
-	    PORT=$( port ${machine} )
+        address=$( address ${machine} )
+	    port=$( port ${machine} )
 
 	    #repeat for number of DB-Clients per machine
         i=0
-        while [ $i -lt $DB_CLIENTS_PER_BOX ]
+        while [ $i -lt $clientsPerBox ]
         do
 
-            ssh ${USER}@${ADDRESS} -p ${PORT} "tail -f ${TARGET_DIR}/${VERSION}/dbClient${i}.out" &
+            ssh ${USER}@${address} -p ${port} "tail -f ${BASE_DIR}/${version}/dbClient${i}.out" &
             echo "tailing on ${machine} DB-Client ${i} output"
 
             i=$[$i+1]
@@ -215,34 +237,33 @@ function tailDbClientOutput {
 
 
 function downLoadResults {
-    VERSION=$1
-    DB_CLIENTS_PER_BOX=$2
-    WORKLOAD=$3
-    DESTINATION_DIR=$4
+    version=$1
+    clientsPerBox=$2
+    workload=$3
+    outDir=$4
 
-    mkdir ${DESTINATION_DIR}
-    mkdir ${DESTINATION_DIR}/${VERSION}
+    mkdir ${outDir}
+    mkdir ${outDir}/${version}
 
     box=0
     for machine in $MACHINES
     do
-        ADDRESS=$(address ${machine} )
-	    PORT=$( port ${machine} )
+        address=$(address ${machine} )
+	    port=$( port ${machine} )
 
-        mkdir ${DESTINATION_DIR}/${VERSION}/box${box}
+        mkdir ${outDir}/${version}/box${box}
 
 #       repeat for number of DB-Clients per machine
         i=0
-        while [ $i -lt $DB_CLIENTS_PER_BOX ]
+        while [ $i -lt $clientsPerBox ]
         do
 
+	        scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/${version}/dbClient${i}-${workload}-loadResult.txt ${outDir}/${version}/box${box}
+	        scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/${version}/dbClient${i}-${workload}-runResult.txt ${outDir}/${version}/box${box}
+            echo "downLoading Results of ${version} ${workload} from DB Client ${i} on ${machine} to ${outDir}/${version}/box${box}"
 
-	        scp -P ${PORT} -q -r ${USER}@${ADDRESS}:${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-loadResult.txt ${DESTINATION_DIR}/${VERSION}/box${box}
-	        scp -P ${PORT} -q -r ${USER}@${ADDRESS}:${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-runResult.txt ${DESTINATION_DIR}/${VERSION}/box${box}
-            echo "downLoading Results of ${VERSION} ${WORKLOAD} from DB Client ${i} on ${machine} "
-
-            ssh ${USER}@${ADDRESS} -p ${PORT} "rm -f ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-loadResult.txt"
-            ssh ${USER}@${ADDRESS} -p ${PORT} "rm -f ${TARGET_DIR}/${VERSION}/dbClient${i}-${WORKLOAD}-runResult.txt"
+            ssh ${USER}@${address} -p ${port} "rm -f ${BASE_DIR}/${version}/dbClient${i}-${workload}-loadResult.txt"
+            ssh ${USER}@${address} -p ${port} "rm -f ${BASE_DIR}/${version}/dbClient${i}-${workload}-runResult.txt"
 
             i=$[$i+1]
         done
@@ -252,12 +273,11 @@ function downLoadResults {
 
 
 function combineResults {
-    DESTINATION_DIR=$1
-    VERSION=$2
-    FILE_NAMES=$3
+    outDir=$1
+    version=$2
 
-    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${DESTINATION_DIR}/${VERSION} "loadResult" > ${DESTINATION_DIR}/${VERSION}/loadReport.csv
-    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${DESTINATION_DIR}/${VERSION} "runResult"  > ${DESTINATION_DIR}/${VERSION}/runReport.csv
+    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${outDir}/${version} "loadResult" > ${outDir}/${version}/loadReport.csv
+    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${outDir}/${version} "runResult"  > ${outDir}/${version}/runReport.csv
 }
 
 
@@ -265,10 +285,9 @@ function killAllJava {
 
     for machine in $MACHINES
     do
-        ADDRESS=$(address ${machine} )
-	    PORT=$( port ${machine} )
+        address=$(address ${machine} )
+	    port=$( port ${machine} )
 
-        ssh ${USER}@${ADDRESS} -p ${PORT} "killall -9 java"
+        ssh ${USER}@${address} -p ${port} "killall -9 java"
     done
-
 }

@@ -24,11 +24,11 @@ public class HzCluster {
             nodes.add(Hazelcast.newHazelcastInstance());
         }
 
-        System.out.println("HI");
-
 
         if(args.length==2){
             int targetSZ = Integer.parseInt(args[1]);
+            System.err.println("Target Cluster Size="+targetSZ);
+
             boolean go=true;
             while(go){
 
