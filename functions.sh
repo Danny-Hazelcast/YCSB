@@ -25,7 +25,7 @@ function port {
 
 function zipCurrentDir {
     echo ===============================================================
-    echo zipping pwd
+    echo zipping
     echo ===============================================================
 
     NAME=$1
@@ -62,13 +62,16 @@ function initCluster {
     jvmsPerBox=$2
     nodesPerJvm=$3
 
-    clusterSize=$[${#MACHINES[@]}*jvmsPerBox*nodesPerJvm]
-    lastOne=$[${#MACHINES[@]}*jvmsPerBox-1]
+    numberOfBoxes=${#MACHINES[@]}
 
-    echo "cluster Size=${clusterSize}"
+    clusterSize=$[numberOfBoxes*jvmsPerBox*nodesPerJvm]
+    lastOne=$[numberOfBoxes*jvmsPerBox-1]
+
+    echo "====== Init Cluster ========"
+    echo "expect cluster Size=${clusterSize} last JVM #${lastOne}"
 
     count=0
-    for machine in ${MACHINES}
+    for machine in ${MACHINES[@]}
     do
         address=$( address ${machine} )
 	    port=$( port ${machine} )
@@ -79,7 +82,7 @@ function initCluster {
             echo "Starting on ${machine} JVM${i} with ${nodesPerJvm} Nodes, at version ${version}"
             if [ ${count} == ${lastOne} ]; then
 
-                echo "starting last one ${count}"
+                echo "starting last JVM"
 
                 expect -c '
                 set timeout 90
@@ -124,7 +127,7 @@ function loadPhase {
 
     pids=()
     startIdx=0;
-    for machine in $MACHINES
+    for machine in ${MACHINES[@]}
     do
         address=$( address ${machine} )
 	    port=$( port ${machine} )
@@ -162,7 +165,7 @@ function transactionPhase {
 
     echo "=====Running work Phase====="
     pids=()
-    for machine in $MACHINES
+    for machine in ${MACHINES[@]}
     do
         address=$( address ${machine} )
 	    port=$( port ${machine} )
@@ -194,7 +197,7 @@ function tailClusterOutput {
     version=$1
     jvmsPerBox=$2
 
-    for machine in $MACHINES
+    for machine in ${MACHINES[@]}
     do
         address=$( address ${machine} )
 	    port=$( port ${machine} )
@@ -216,7 +219,7 @@ function tailDbClientOutput {
     version=$1
     clientsPerBox=$2
 
-    for machine in $MACHINES
+    for machine in ${MACHINES[@]}
     do
         address=$( address ${machine} )
 	    port=$( port ${machine} )
@@ -244,11 +247,13 @@ function downLoadResults {
     workload=$3
     outDir=$4
 
+    echo "=====Getting results====="
+
     mkdir ${outDir}
     mkdir ${outDir}/${version}
 
     box=0
-    for machine in $MACHINES
+    for machine in ${MACHINES[@]}
     do
         address=$(address ${machine} )
 	    port=$( port ${machine} )
@@ -271,6 +276,9 @@ function downLoadResults {
         done
         box=$[$box+1]
     done
+
+    echo "=====got results====="
+
 }
 
 function saveRunInfo {
@@ -295,14 +303,21 @@ function combineResults {
     outDir=$1
     version=$2
 
-    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${outDir}/${version} "loadResult" > ${outDir}/${version}/loadReport.csv
-    java -jar resultcombine/target/ResultCombine-0.1.4.jar ${outDir}/${version} "runResult"  > ${outDir}/${version}/runReport.csv
+    java -jar resultcombine/target/ResultCombine-0.1.4.jar "combine" ${outDir}/${version} "loadResult" ${version} > ${outDir}/${version}/loadSummery.csv
+    java -jar resultcombine/target/ResultCombine-0.1.4.jar "combine" ${outDir}/${version} "runResult"  ${version} > ${outDir}/${version}/runSummery.csv
+}
+
+function reportResults {
+    outDir=$1
+    version=$2
+
+    java -jar resultcombine/target/ResultCombine-0.1.4.jar "report" ${outDir} "Summery" > ${outDir}/report.csv
 }
 
 
 function killAllJava {
 
-    for machine in $MACHINES
+    for machine in ${MACHINES[@]}
     do
         address=$(address ${machine} )
 	    port=$( port ${machine} )
