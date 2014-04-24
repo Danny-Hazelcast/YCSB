@@ -60,12 +60,12 @@ function install {
 function initCluster {
     version=$1
     jvmsPerBox=$2
-    nodesPerBox=$3
+    nodesPerJvm=$3
 
-    totalNodes=$[jvmsPerBox*nodesPerBox]
+    clusterSize=$[${#MACHINES[@]}*jvmsPerBox*nodesPerJvm]
     lastOne=$[${#MACHINES[@]}*jvmsPerBox-1]
 
-    echo "totalNodes = ${totalNodes}"
+    echo "cluster Size=${clusterSize}"
 
     count=0
     for machine in ${MACHINES}
@@ -76,14 +76,14 @@ function initCluster {
         i=0
         while [ $i -lt ${jvmsPerBox} ]
         do
-            echo "Starting on ${machine} JVM${i} with ${nodesPerBox} Nodes, at version ${version}"
+            echo "Starting on ${machine} JVM${i} with ${nodesPerJvm} Nodes, at version ${version}"
             if [ ${count} == ${lastOne} ]; then
 
                 echo "starting last one ${count}"
 
                 expect -c '
                 set timeout 90
-                spawn ssh '"${USER}"'@'"${address}"' -p '"${port}"' "java -jar '"${BASE_DIR}"'/'"${version}"'/target/*.jar '"${nodesPerBox}"' '"${totalNodes}"'"
+                spawn ssh '"${USER}"'@'"${address}"' -p '"${port}"' "java -jar '"${BASE_DIR}"'/'"${version}"'/target/*.jar '"${nodesPerJvm}"' '"${clusterSize}"'"
                 expect {
                 "===>>CLUSTERED<<===" { exit 22}
                 timeout {exit -1}
@@ -91,15 +91,15 @@ function initCluster {
                 '
 
                 if [ ${?} == 22 ]; then
-                    echo "=====CLUSTERED==== version ${version}"
+                    echo "CLUSTERED CONFIRMED version ${version}"
                     return 0
                 else
-                    echo "!!! FAILED TO FORM THE FULL ${totalNodes} NODE CLUSTER !!!  version ${version}"
+                    echo "!!! FAILED TO FORM THE FULL ${clusterSize} NODE CLUSTER !!!  version ${version}"
                     return 2
                 fi
 
             else
-                ssh ${USER}@${address} -p ${port} "java -jar ${BASE_DIR}/${version}/target/*.jar ${nodesPerBox} ${totalNodes} > ${BASE_DIR}/${version}/node${i}.out 2>&1" &
+                ssh ${USER}@${address} -p ${port} "java -jar ${BASE_DIR}/${version}/target/*.jar ${nodesPerJvm} ${clusterSize} > ${BASE_DIR}/${version}/node${i}.out 2>&1" &
             fi
 
             i=$[$i+1]
@@ -238,6 +238,8 @@ function tailDbClientOutput {
 
 function downLoadResults {
     version=$1
+    jvmsPerBox=$2
+
     clientsPerBox=$2
     workload=$3
     outDir=$4
@@ -271,6 +273,23 @@ function downLoadResults {
     done
 }
 
+function saveRunInfo {
+    version=$1
+    jvmsPerBox=$2
+    nodesPerJvm=$3
+    clientsPerBox=$4
+    clientProps=$5
+    workload=$6
+    outDir=$7
+
+    clusterSize=$[${#MACHINES[@]}*jvmsPerBox*nodesPerJvm]
+    totalProducers=$[${#MACHINES[@]}*clientsPerBox]
+
+    scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/workloads/${workload} ${outDir}/${version}
+	scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/${clientProps} ${outDir}/${version}
+
+	echo "${clusterSize} Node Cluster, over ${#MACHINES[@]} box, (${jvmsPerBox} Jvm's per box, ${nodesPerJvm} Nodes per Jvm), ${totalProducers} Load producers (over ${#MACHINES[@]} box, ${clientsPerBox} per box)" > ${outDir}/${version}/info.txt
+}
 
 function combineResults {
     outDir=$1
