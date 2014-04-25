@@ -6,7 +6,7 @@ HZ26="hz26"
 HZ30="hz30"
 HZ31="hz31"
 HZ32="hz32"
-VERSIONS=("${HZ31}" "${HZ32}")
+VERSIONS=("${HZ26}" "${HZ30}" "${HZ31}" "${HZ32}")
 
 
 WORKLOADa="workloada"
@@ -45,7 +45,7 @@ OUTPUT_DIR="report"
 
         fi
 
-        reportResults ${OUTPUT_DIR}
-
         killAllJava
     done
+
+    reportResults ${OUTPUT_DIR}

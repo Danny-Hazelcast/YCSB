@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 
-public class ResultCombine {
+public class Merge {
 
     public static ListMultimap<String, Double> data = ArrayListMultimap.create();
 
     public static String version;
 
-    public ResultCombine(String args[]) throws IOException {
+    public Merge(String args[]) throws IOException {
 
         String dir = args[1];
         String fileNames = args[2];
@@ -50,7 +50,7 @@ public class ResultCombine {
 
         Collection files = FileUtils.listFiles(
                 dir,
-                new RegexFileFilter(".*"+names+"\\.txt"),
+                new RegexFileFilter(".*"+names+".*"),
                 DirectoryFileFilter.DIRECTORY
         );
 
@@ -90,13 +90,12 @@ public class ResultCombine {
     }
 
     public static void printLoad(){
+        System.out.println("[version], "+version);
         printData("[INSERT]");
     }
 
 
     public static void printData(String type){
-
-        System.out.println("[version], "+version);
 
         String key = "[OVERALL] RunTime(ms)";
         System.out.println(type+""+key+", "+data.get(key).get(0));

@@ -303,15 +303,18 @@ function combineResults {
     outDir=$1
     version=$2
 
-    java -jar processresults/target/processResults-0.1.4.jar "combine" ${outDir}/${version} "loadResult" ${version} > ${outDir}/${version}/loadSummery.csv
-    java -jar processresults/target/processResults-0.1.4.jar "combine" ${outDir}/${version} "runResult"  ${version} > ${outDir}/${version}/runSummery.csv
+    java -jar processresults/target/processResults-0.1.4.jar "merge" ${outDir}/${version} "runResult"  ${version} > ${outDir}/${version}/temp.csv
+    java -jar processresults/target/processResults-0.1.4.jar "merge" ${outDir}/${version} "loadResult" ${version} > ${outDir}/${version}/result.csv
+
+    cat ${outDir}/${version}/temp.csv >>  ${outDir}/${version}/result.csv
+    rm ${outDir}/${version}/temp.csv
 }
 
 function reportResults {
     outDir=$1
     version=$2
 
-    java -jar processresults/target/processResults-0.1.4.jar "report" ${outDir} "Summery" > ${outDir}/report.csv
+    java -jar processresults/target/processResults-0.1.4.jar "combine" ${outDir} "result" > ${outDir}/report.csv
 }
 
 

@@ -3,21 +3,28 @@ import com.google.common.collect.ListMultimap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 
-public class ReportResults {
+public class Combine {
 
-    public static ListMultimap<String, Double> data = ArrayListMultimap.create();
+    public static ListMultimap<String, String> data = ArrayListMultimap.create();
+
+    public static Map<String, Double> versionedData = new HashMap();
+    public static List<String> versions = new ArrayList<String>();
+
+    public static String[] oppType = {"[INSERT]", "[UPDATE]", "[READ]"};
 
     public static String version;
 
-    public ReportResults(String args[]) throws IOException {
+    public Combine(String args[]) throws IOException {
 
         String dir = args[1];
         String fileNames = args[2];
@@ -34,6 +41,7 @@ public class ReportResults {
             }
         }
 
+        makeChart();
         printdata();
     }
 
@@ -42,7 +50,7 @@ public class ReportResults {
 
         Collection files = FileUtils.listFiles(
                 dir,
-                new RegexFileFilter(".*"+names+"\\.csv"),
+                new RegexFileFilter(".*"+names+".*"),
                 DirectoryFileFilter.DIRECTORY
         );
 
@@ -54,20 +62,37 @@ public class ReportResults {
         while ( (line = in.readLine()) !=null ) {
 
             StringTokenizer st = new StringTokenizer(line, ",", false);
-
-            if(st.countTokens()==1){
-                System.out.println(line);
-                continue;
-            }
-
             String key1 = st.nextToken();
+            String value = st.nextToken();
 
-            double value = Double.parseDouble(st.nextToken());
             data.put(key1, value);
+        }
+
+        String versionKey = "[version]";
+        String version = data.get(versionKey).get(data.get(versionKey).size()-1);
+        versions.add(version);
+
+        for(String k : data.keySet()){
+
+            if(!k.equals(versionKey)){
+
+                String value = data.get(k).get(data.get(k).size()-1);
+
+                if(versionedData.containsKey(version+k)){
+                    System.out.println("!!!!!   BROKENooooooooooo ==="+ version+k );
+                    System.exit(1);
+                }
+
+                versionedData.put(version+k, Double.parseDouble(value));
+            }
         }
     }
 
     public static void printdata(){
+
+        String key = "[version]";
+        System.out.println(key+", "+data.get(key));
+
         printData("[INSERT]");
         printData("[UPDATE]");
         printData("[READ]");
@@ -113,4 +138,35 @@ public class ReportResults {
         key = type+" >1000";
         System.out.println(key+", "+data.get(key));
     }
+
+
+    public static void makeChart(){
+
+        DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+
+        for(String version : versions){
+            for(String type : oppType){
+
+                String key = version+type+" 99thPercentileLatency(ms)";
+                double val = versionedData.get(key);
+                dataSet.setValue(val, type, version);
+            }
+        }
+
+        JFreeChart objChart = ChartFactory.createBarChart(
+                "99th Percentile Latency (ms)",     //Chart title
+                "Systems",     //Domain axis label
+                "ms",         //Range axis label
+                dataSet,         //Chart Data
+                PlotOrientation.VERTICAL, // orientation
+                true,             // include legend?
+                true,             // include tooltips?
+                false             // include URLs?
+        );
+
+        try {
+            ChartUtilities.saveChartAsPNG(new File("report/Percentile.png"), objChart, 500, 400);
+        } catch (IOException e) {}
+    }
+
 }
