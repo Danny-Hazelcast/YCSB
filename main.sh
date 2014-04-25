@@ -2,13 +2,11 @@
 . functions.sh
 
 
-
 HZ26="hz26"
 HZ30="hz30"
 HZ31="hz31"
 HZ32="hz32"
-#VERSIONS="${HZ26} ${HZ30} ${HZ31} ${HZ32}"
-VERSIONS="${HZ31} ${HZ32}"
+VERSIONS=("${HZ31}" "${HZ32}")
 
 
 WORKLOADa="workloada"
@@ -31,7 +29,7 @@ INSERTS_PER_DB_CLIENT=1000
 OUTPUT_DIR="report"
 
 
-    for VERSION in ${VERSIONS}
+    for VERSION in ${VERSIONS[@]}
     do
         initCluster ${VERSION} ${CLUSTER_JVMS_PER_BOX} ${CLUSTER_NODES_PER_JVM}
 

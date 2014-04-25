@@ -15,17 +15,19 @@ public class ResultCombine {
 
     public static ListMultimap<String, Double> data = ArrayListMultimap.create();
 
-    public static void main(String args[]) throws IOException {
+    public static String version;
 
-        String dir = args[0];
-        String fileNames = args[1];
+    public ResultCombine(String args[]) throws IOException {
+
+        String dir = args[1];
+        String fileNames = args[2];
+        version = args[3];
 
 
         Collection<File> files = getfileNames( dir, fileNames );
 
         for(File f : files){
             try {
-                //System.out.println(f.getName());
                 BufferedReader in = new BufferedReader(new FileReader(f));
                 addDataFrom(in);
 
@@ -45,7 +47,6 @@ public class ResultCombine {
 
     public static Collection<File> getfileNames(String path, String names){
         File dir = new File(path);
-
 
         Collection files = FileUtils.listFiles(
                 dir,
@@ -82,33 +83,33 @@ public class ResultCombine {
         }
     }
 
-    public static void printOverall(){
-
-        String key = "[OVERALL] RunTime(ms)";
-        System.out.println(key+", "+data.get(key).get(0));
-
-        key = "[OVERALL] Throughput(ops/sec)";
-        System.out.println(key+", "+data.get(key).get(0));
-    }
 
     public static void printRun(){
-
-        printOverall();
-
         printData("[UPDATE]");
         printData("[READ]");
     }
 
     public static void printLoad(){
-
-        printOverall();
-
         printData("[INSERT]");
     }
 
+
     public static void printData(String type){
 
-        String key = type+" Operations";
+        System.out.println("[version], "+version);
+
+        String key = "[OVERALL] RunTime(ms)";
+        System.out.println(type+""+key+", "+data.get(key).get(0));
+
+        key = "[OVERALL] Throughput(ops/sec)";
+        System.out.println(type+""+key+", "+data.get(key).get(0));
+
+
+
+        key = type+" Operations";
+        System.out.println(key+", "+data.get(key).get(0).intValue());
+
+        key = type+" Return=0";
         System.out.println(key+", "+data.get(key).get(0).intValue());
 
         key = type+" AverageLatency(us)";
@@ -127,16 +128,15 @@ public class ResultCombine {
         System.out.println(key+", "+data.get(key).get(0));
 
 
-        System.out.println(type+" Histogram");
+        //System.out.println(type+" Histogram,");
 
-        System.out.println("complete in ms, count");
         for(int i=0; i<1000; i++){
            key = type+" "+i;
-           System.out.println(i+", "+data.get(key).get(0));
+           System.out.println(key+", "+data.get(key).get(0));
         }
 
         key = type+" >1000";
-        System.out.println(">1000, "+data.get(key).get(0));
+        System.out.println(key+", "+data.get(key).get(0));
     }
 
 

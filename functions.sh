@@ -1,5 +1,5 @@
 #!/usr/bin/expect -d
-. golbal.sh
+. global.sh
 
 function address {
 	MACHINE=$1
