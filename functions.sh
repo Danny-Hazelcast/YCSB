@@ -250,6 +250,7 @@ function downLoadResults {
     echo "=====Getting results====="
 
     mkdir ${outDir}
+    #rm -rf ${outDir}/${version}  this is proabley what i want to do
     mkdir ${outDir}/${version}
 
     boxNumber=0
@@ -277,7 +278,7 @@ function downLoadResults {
         boxNumber=$[$boxNumber+1]
     done
 
-    echo "=====got results====="
+    echo "====results in ${outDir}====="
 
 }
 
