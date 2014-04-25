@@ -93,9 +93,9 @@ public class Combine {
         String key = "[version]";
         System.out.println(key+", "+data.get(key));
 
-        printData("[INSERT]");
-        printData("[UPDATE]");
-        printData("[READ]");
+        for(String type : oppType){
+            printData(type);
+        }
     }
 
     public static void printData(String type){
