@@ -3,9 +3,9 @@
 
 zipCurrentDir "ycsb.zip"
 
-for machine in $MACHINES
+for box in ${MACHINES[@]}
 do
-	install $machine "ycsb.zip"
+	install $box "ycsb.zip"
 done
 
 rm -f "ycsb.zip"

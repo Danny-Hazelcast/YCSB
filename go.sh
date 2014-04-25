@@ -43,8 +43,6 @@ OUTPUT_DIR="report"
 
             combineResults ${OUTPUT_DIR} ${VERSION}
 
-        else
-            echo "!!! NO GO !!!"
         fi
 
         reportResults ${OUTPUT_DIR}
