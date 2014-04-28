@@ -23,11 +23,13 @@ public class Combine {
     public static String[] oppType = {"[INSERT]", "[UPDATE]", "[READ]"};
 
     public static String version;
+    public static String dir;
 
     public Combine(String args[]) throws IOException {
 
-        String dir = args[1];
+        dir = args[1];
         String fileNames = args[2];
+
 
         Collection<File> files = getfileNames( dir, fileNames );
 
@@ -41,7 +43,16 @@ public class Combine {
             }
         }
 
-        makeChart();
+        makeChart("[OVERALL] Throughput(ops/sec)", "Throughput", "(ops/sec)", "throughput");
+        makeChart(" AverageLatency(us)", "Average Latency", "(us)", "averageLatency");
+
+        makeChart(" MaxLatency(us)", " Max Latency (us)", "us", "maxLatency");
+        makeChart(" MinLatency(us)", " Min Latency (us)", "us", "minLatency");
+
+        makeChart(" 95thPercentileLatency(ms)", "95th Percentile Latency (ms)", "ms", "95thPercentileLatency");
+        makeChart(" 99thPercentileLatency(ms)", "99th Percentile Latency (ms)", "ms", "99thPercentileLatency");
+
+
         printdata();
     }
 
@@ -140,23 +151,23 @@ public class Combine {
     }
 
 
-    public static void makeChart(){
+    public static void makeChart(String dataKey, String title, String rangeAxis, String fileName){
 
         DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 
         for(String version : versions){
             for(String type : oppType){
 
-                String key = version+type+" 99thPercentileLatency(ms)";
+                String key = version+type+dataKey;
                 double val = versionedData.get(key);
                 dataSet.setValue(val, type, version);
             }
         }
 
         JFreeChart objChart = ChartFactory.createBarChart(
-                "99th Percentile Latency (ms)",     //Chart title
+                title,     //Chart title
                 "Systems",     //Domain axis label
-                "ms",         //Range axis label
+                rangeAxis,         //Range axis label
                 dataSet,         //Chart Data
                 PlotOrientation.VERTICAL, // orientation
                 true,             // include legend?
@@ -165,7 +176,7 @@ public class Combine {
         );
 
         try {
-            ChartUtilities.saveChartAsPNG(new File("report/Percentile.png"), objChart, 500, 400);
+            ChartUtilities.saveChartAsPNG(new File(dir+"/"+fileName+".png"), objChart, 500, 400);
         } catch (IOException e) {}
     }
 

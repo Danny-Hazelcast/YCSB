@@ -250,7 +250,6 @@ function downLoadResults {
     echo "=====Getting results====="
 
     mkdir ${outDir}
-    #rm -rf ${outDir}/${version}  this is proabley what i want to do
     mkdir ${outDir}/${version}
 
     boxNumber=0
@@ -294,10 +293,10 @@ function saveRunInfo {
     clusterSize=$[${#MACHINES[@]}*jvmsPerBox*nodesPerJvm]
     totalProducers=$[${#MACHINES[@]}*clientsPerBox]
 
-    scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/workloads/${workload} ${outDir}/${version}
-	scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/${clientProps} ${outDir}/${version}
+    scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/workloads/${workload} ${outDir}
+	scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/${clientProps} ${outDir}
 
-	echo "${clusterSize} Node Cluster, over ${#MACHINES[@]} box, (${jvmsPerBox} Jvm's per box, ${nodesPerJvm} Nodes per Jvm), ${totalProducers} Load producers (over ${#MACHINES[@]} box, ${clientsPerBox} per box)" > ${outDir}/${version}/info.txt
+	echo "${clusterSize} Node Cluster, over ${#MACHINES[@]} box, (${jvmsPerBox} Jvm's per box, ${nodesPerJvm} Nodes per Jvm), ${totalProducers} Load producers (over ${#MACHINES[@]} box, ${clientsPerBox} per box)" > ${outDir}/info.txt
 }
 
 function combineResults {
@@ -313,7 +312,6 @@ function combineResults {
 
 function reportResults {
     outDir=$1
-    version=$2
 
     java -jar processresults/target/processResults-0.1.4.jar "combine" ${outDir} "result" > ${outDir}/report.csv
 }
