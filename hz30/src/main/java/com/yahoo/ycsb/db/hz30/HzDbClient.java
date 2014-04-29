@@ -94,7 +94,6 @@ public class HzDbClient extends DB {
                 result.put(field, new StringByteIterator(row.get(field)));
         }
 
-        map.get(key);
 		return OK;
 	}
 

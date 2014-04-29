@@ -1,5 +1,8 @@
 #!/bin/bash
 . functions.sh
 
+GG="gridgain"
+DB_CLIENTS_PER_BOX=8
 
-tailDbClientOutput ${VERSION} ${DB_CLIENTS_PER_BOX}
+
+tailDbClientOutput ${GG} ${DB_CLIENTS_PER_BOX}

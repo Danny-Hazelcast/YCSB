@@ -83,6 +83,7 @@
     <module>Hz30</module>
     <module>infini2</module>
     <module>processResults</module>
+      <module>gridgrain</module>
 
   </modules>
 

@@ -46,7 +46,7 @@ DATABASES = {
     "hz31"        : "com.yahoo.ycsb.db.hz31.HzDbClient",
     "hz32"        : "com.yahoo.ycsb.db.hz32.HzDbClient",
     "infini2"     : "com.yahoo.ycsb.db.infini2.InfinispanClient",
-
+    "gridgain"    : "com.yahoo.ycsb.db.gridgain.GridGainDbClient"
 }
 
 OPTIONS = {
