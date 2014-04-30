@@ -62,7 +62,7 @@ function initCluster {
     jvmsPerBox=$2
     nodesPerJvm=$3
 
-    numberOfBoxes=${#MACHINES[@]}
+    numberOfBoxes=${#CLUSTER_MACHINES[@]}
 
     clusterSize=$[numberOfBoxes*jvmsPerBox*nodesPerJvm]
     lastOne=$[numberOfBoxes*jvmsPerBox-1]
@@ -71,7 +71,7 @@ function initCluster {
     echo "expect cluster Size=${clusterSize} last JVM #${lastOne}"
 
     count=0
-    for box in ${MACHINES[@]}
+    for box in ${CLUSTER_MACHINES[@]}
     do
         address=$( address ${box} )
 	    port=$( port ${box} )
@@ -121,13 +121,13 @@ function loadPhase {
     clientProps=$4
     workload=$5
 
-    totalRecords=$[${#MACHINES[@]}*clientsPerBox*insertsPerClient]
+    totalRecords=$[${#LOAD_MACHINES[@]}*clientsPerBox*insertsPerClient]
     echo "=====Running Load Phase====="
     echo "totalRecords to insert=${totalRecords}"
 
     pids=()
     startIdx=0;
-    for box in ${MACHINES[@]}
+    for box in ${LOAD_MACHINES[@]}
     do
         address=$( address ${box} )
 	    port=$( port ${box} )
@@ -160,12 +160,12 @@ function transactionPhase {
     clientProps=$4
     workload=$5
 
-    totalRecords=$[${#MACHINES[@]}*clientsPerBox*insertsPerClient]
+    totalRecords=$[${#LOAD_MACHINES[@]}*clientsPerBox*insertsPerClient]
 
 
     echo "=====Running work Phase====="
     pids=()
-    for box in ${MACHINES[@]}
+    for box in ${LOAD_MACHINES[@]}
     do
         address=$( address ${box} )
 	    port=$( port ${box} )
@@ -197,7 +197,7 @@ function tailClusterOutput {
     version=$1
     jvmsPerBox=$2
 
-    for box in ${MACHINES[@]}
+    for box in ${CLUSTER_MACHINES[@]}
     do
         address=$( address ${box} )
 	    port=$( port ${box} )
@@ -219,7 +219,7 @@ function tailDbClientOutput {
     version=$1
     clientsPerBox=$2
 
-    for box in ${MACHINES[@]}
+    for box in ${LOAD_MACHINES[@]}
     do
         address=$( address ${box} )
 	    port=$( port ${box} )
@@ -253,7 +253,7 @@ function downLoadResults {
     mkdir ${outDir}/${version}
 
     boxNumber=0
-    for box in ${MACHINES[@]}
+    for box in ${LOAD_MACHINES[@]}
     do
         address=$(address ${box} )
 	    port=$( port ${box} )
@@ -290,13 +290,14 @@ function saveRunInfo {
     workload=$6
     outDir=$7
 
-    clusterSize=$[${#MACHINES[@]}*jvmsPerBox*nodesPerJvm]
-    totalProducers=$[${#MACHINES[@]}*clientsPerBox]
+    clusterSize=$[${#CLUSTER_MACHINES[@]}*jvmsPerBox*nodesPerJvm]
+
+    totalProducers=$[${#LOAD_MACHINES[@]}*clientsPerBox]
 
     scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/workloads/${workload} ${outDir}
 	scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/${clientProps} ${outDir}
 
-	echo "${clusterSize} Node Cluster, over ${#MACHINES[@]} box, (${jvmsPerBox} Jvm's per box, ${nodesPerJvm} Nodes per Jvm), ${totalProducers} Load producers (over ${#MACHINES[@]} box, ${clientsPerBox} per box)" > ${outDir}/info.txt
+	echo "${clusterSize} Node Cluster, over ${#CLUSTER_MACHINES[@]} box, (${jvmsPerBox} Jvm's per box, ${nodesPerJvm} Nodes per Jvm), ${totalProducers} Load producers (over ${#LOAD_MACHINES[@]} box, ${clientsPerBox} per box)" > ${outDir}/info.txt
 }
 
 function combineResults {
@@ -319,7 +320,7 @@ function reportResults {
 
 function killAllJava {
 
-    for box in ${MACHINES[@]}
+    for box in ${ALL_MACHINES[@]}
     do
         address=$(address ${box} )
 	    port=$( port ${box} )

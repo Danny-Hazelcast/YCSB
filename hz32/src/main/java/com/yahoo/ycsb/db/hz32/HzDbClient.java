@@ -1,6 +1,7 @@
 package com.yahoo.ycsb.db.hz32;
 
 import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -54,11 +55,17 @@ public class HzDbClient extends DB {
 
             for(int i=0; i<nodesPerJVM; i++){
                 if(clientNodes){
-                    nodez.add(HazelcastClient.newHazelcastClient());
+
+                    ClientConfig config = new ClientConfig();
+                    config.getNetworkConfig().addAddress("192.168.2.102:5701"); //192.168.2.102:5701
+
+                    nodez.add(HazelcastClient.newHazelcastClient(config));
                 }else{
                     nodez.add(Hazelcast.newHazelcastInstance());
                 }
             }
+
+
 
             initFinished.countDown();
             return;

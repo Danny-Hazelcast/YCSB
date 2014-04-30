@@ -7,8 +7,8 @@ HZ31="hz31"
 HZ32="hz32"
 GG="gridgain"
 
-VERSIONS=("${HZ26}" "${HZ30}" "${HZ31}" "${HZ32}" "${GG}")
-#VERSIONS=("${GG}" "${HZ32}")
+#VERSIONS=("${HZ26}" "${HZ30}" "${HZ31}" "${HZ32}" "${GG}")
+VERSIONS=("${GG}" "${HZ32}")
 
 WORKLOADa="workloada"
 WORKLOADb="workloadb"
@@ -51,6 +51,5 @@ OUTPUT_DIR="report"
     done
 
     saveRunInfo ${VERSION} ${CLUSTER_JVMS_PER_BOX} ${CLUSTER_NODES_PER_JVM} ${DB_CLIENTS_PER_BOX} "2client.properties" ${WORKLOAD} ${OUTPUT_DIR}
-
 
     reportResults ${OUTPUT_DIR}

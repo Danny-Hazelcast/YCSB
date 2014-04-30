@@ -3,7 +3,7 @@
 
 zipCurrentDir "ycsb.zip"
 
-for box in ${MACHINES[@]}
+for box in ${ALL_MACHINES[@]}
 do
 	install $box "ycsb.zip"
 done
