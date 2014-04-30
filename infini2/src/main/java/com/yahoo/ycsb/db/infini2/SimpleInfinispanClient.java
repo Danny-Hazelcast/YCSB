@@ -13,19 +13,28 @@ public class SimpleInfinispanClient{
 
         remoteCacheManager = new RemoteCacheManager(address);
 
-        RemoteCache<String, String> cache = remoteCacheManager.getCache(cacheName);
+        RemoteCache cache = remoteCacheManager.getCache(cacheName);
 
         System.err.println("cache.getName() = "+cache.getName());
         System.err.println("cache.isEmpty() = "+ cache.isEmpty());
         System.err.println("cache.size() = "+cache.size());
 
+        System.err.println(remoteCacheManager.getMarshaller());
+        try {
+            boolean res = remoteCacheManager.getMarshaller().isMarshallable("key"+1);
+            System.err.println(res);
+
+
+            System.out.println( remoteCacheManager.getMarshaller().objectToByteBuffer("key"+0) );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         for(int i=0; i<3; i++){
 
-            String val = cache.get("key"+i);
+            Object val = cache.get(i);
             System.err.println(val);
-
-
-            cache.put("key" + i, "value" + i);
+            cache.put(i, i);
         }
     }
 }

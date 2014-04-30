@@ -20,7 +20,7 @@ WORKLOADZ="workloadZ"
 WORKLOAD=${WORKLOADZ}
 
 
-CLUSTER_JVMS_PER_BOX=1
+CLUSTER_JVMS_PER_BOX=2
 CLUSTER_NODES_PER_JVM=1
 
 
@@ -46,6 +46,7 @@ OUTPUT_DIR="report"
 
         fi
 
+        killAllJava
         killAllJava
     done
 

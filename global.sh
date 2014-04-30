@@ -9,8 +9,9 @@ BOX2='192.168.2.102'
 BOX3='192.168.2.103'
 BOX4='192.168.2.104'
 
-MACHINES=("${BOX2}" "${BOX3}")
-#MACHINES=("${BOX1}" "${BOX2}" "${BOX3}" "${BOX4}")
+#MACHINES=("${BOX2}" "${BOX3}")
+
+MACHINES=("${BOX1}" "${BOX2}" "${BOX3}" "${BOX4}")
 
 #MACHINES=("${LOCALHOST}")
 

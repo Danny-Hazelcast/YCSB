@@ -32,36 +32,35 @@ public class SimpleInfinispanServer {
                 new ConfigurationBuilder().build()
         );
 
-        //Configuration c = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).build();
-
         Configuration c = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).build();
-
 
         manager.defineConfiguration(cacheName, c);
 
         ProtocolServerConfiguration pp = new HotRodServerConfigurationBuilder().build();
-
         hot = new HotRodServer();
         hot.start(pp, manager);
 
         map = manager.getCache(cacheName);
+        map.putForExternalRead("key1", "HI");
+
+        System.out.println( manager.getCacheNames() );
 
         while(true){
+            System.err.println(map.size());
+
+            for(Object k :  map.keySet() ){
+
+
+
+                System.err.print( k +"="+map.get(k) + ", ");
+            }
+            System.err.println();
+
             try {
                 Thread.sleep(8000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            System.err.println(map.size());
-
-            map.putForExternalRead("key1", "HIHHIHIHIHIHIHIHIHIHI");
-
-            for(Object k : map.keySet()){
-                System.err.print( k +"="+map.get(k) + ", ");
-            }
-            System.err.println();
         }
-
     }
 }
