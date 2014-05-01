@@ -23,8 +23,6 @@ public class Merge {
         String fileNames = args[2];
         version = args[3];
 
-        System.out.println(dir);
-
         Collection<File> files = getfileNames( dir, fileNames );
 
         for(File f : files){
