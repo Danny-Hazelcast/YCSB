@@ -1,6 +1,7 @@
 package com.yahoo.ycsb.db.hz30;
 
 import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -40,7 +41,7 @@ public class HzDbClient extends DB {
             Properties prop = getProperties();
 
             String property = prop.getProperty("recordcount", "1");
-            System.err.println("==>> " + property);
+            System.err.println("==>> "+property );
 
 
             String nodesPerJVM_str = prop.getProperty("hazelcastDBClient.nodesPerJVM", "1");
@@ -51,11 +52,22 @@ public class HzDbClient extends DB {
 
             for(int i=0; i<nodesPerJVM; i++){
                 if(clientNodes){
-                    nodez.add(HazelcastClient.newHazelcastClient());
+
+                    //A BIT OF A HACKY FIX fo the case a client in not running on the same box as the server nodes
+                    ClientConfig config = new ClientConfig();
+                    config.addAddress("127.0.0.1:5701");
+                    config.addAddress("192.168.2.101" + ":" + 5701);
+                    config.addAddress("192.168.2.102"+":"+5701);
+                    config.addAddress("192.168.2.103" + ":" + 5701);
+                    config.addAddress("192.168.2.104" + ":" + 5701);
+
+                    nodez.add(HazelcastClient.newHazelcastClient(config));
                 }else{
                     nodez.add(Hazelcast.newHazelcastInstance());
                 }
             }
+
+
 
             initFinished.countDown();
             return;

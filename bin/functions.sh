@@ -25,11 +25,11 @@ function port {
 
 function zipCurrentDir {
     echo ===============================================================
-    echo zipping
+    echo "zipping"
     echo ===============================================================
 
     NAME=$1
-    zip -q -r ${NAME} .
+    zip -q -r ${NAME} ..
 }
 
 
@@ -67,7 +67,6 @@ function initCluster {
     clusterSize=$[numberOfBoxes*jvmsPerBox*nodesPerJvm]
     lastOne=$[numberOfBoxes*jvmsPerBox-1]
 
-    echo "====== Init Cluster ========"
     echo "expect cluster Size=${clusterSize} last JVM #${lastOne}"
 
     count=0
@@ -118,11 +117,11 @@ function loadPhase {
     version=$1
     clientsPerBox=$2
     insertsPerClient=$3
-    clientProps=$4
-    workload=$5
+    operationPerDbClient=$4
+    clientProps=$5
+    workload=$6
 
     totalRecords=$[${#LOAD_MACHINES[@]}*clientsPerBox*insertsPerClient]
-    echo "=====Running Load Phase====="
     echo "totalRecords to insert=${totalRecords}"
 
     pids=()
@@ -135,7 +134,7 @@ function loadPhase {
         i=0
         while [ $i -lt $clientsPerBox ]
         do
-            ssh ${USER}@${address} -p ${port} "./${BASE_DIR}/bin/ycsb load ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p insertstart=${startIdx} -p insertcount=${insertsPerClient} -p recordcount=${totalRecords} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-loadResult.txt 2>${BASE_DIR}/${version}/dbClient${i}.out" &
+            ssh ${USER}@${address} -p ${port} "./${BASE_DIR}/bin/ycsb load ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p insertstart=${startIdx} -p insertcount=${insertsPerClient} -p recordcount=${totalRecords} -p operationcount=${operationPerDbClient} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-loadResult.txt 2>${BASE_DIR}/${version}/dbClient${i}Load.out" &
             pids+=($!)
             echo "Starting on ${box} DB-Client ${i} Load phase of ${workload} inserting ${insertsPerClient} for idx ${startIdx} version ${version}"
             startIdx=$[$startIdx+$insertsPerClient]
@@ -148,8 +147,6 @@ function loadPhase {
     do
        wait ${id}
     done
-
-    echo "=====Load Phase Complete====="
 }
 
 
@@ -157,13 +154,12 @@ function transactionPhase {
     version=$1
     clientsPerBox=$2
     insertsPerClient=$3
-    clientProps=$4
-    workload=$5
+    operationPerDbClient=$4
+    clientProps=$5
+    workload=$6
 
     totalRecords=$[${#LOAD_MACHINES[@]}*clientsPerBox*insertsPerClient]
 
-
-    echo "=====Running work Phase====="
     pids=()
     for box in ${LOAD_MACHINES[@]}
     do
@@ -175,7 +171,7 @@ function transactionPhase {
         while [ $i -lt $clientsPerBox ]
         do
 
-            ssh ${USER}@${address} -p ${port} "./${BASE_DIR}/bin/ycsb run ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p recordcount=${totalRecords} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-runResult.txt 2>${BASE_DIR}/${version}/dbClient${i}.out" &
+            ssh ${USER}@${address} -p ${port} "./${BASE_DIR}/bin/ycsb run ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p recordcount=${totalRecords} -p operationcount=${operationPerDbClient} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-runResult.txt 2>${BASE_DIR}/${version}/dbClient${i}Trans.out" &
             pids+=($!)
             echo "Starting on ${box} DB-Client ${i} Transacton phase of ${workload} version ${version}"
 
@@ -187,8 +183,6 @@ function transactionPhase {
     do
        wait ${id}
     done
-
-    echo "=====Work Phase Complete====="
 }
 
 
@@ -247,8 +241,6 @@ function downLoadResults {
     workload=$3
     outDir=$4
 
-    echo "=====Getting results====="
-
     mkdir ${outDir}
     mkdir ${outDir}/${version}
 
@@ -276,9 +268,6 @@ function downLoadResults {
         done
         boxNumber=$[$boxNumber+1]
     done
-
-    echo "====results in ${outDir}====="
-
 }
 
 function saveRunInfo {
@@ -297,15 +286,15 @@ function saveRunInfo {
     scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/workloads/${workload} ${outDir}
 	scp -P ${port} -q -r ${USER}@${address}:${BASE_DIR}/${clientProps} ${outDir}
 
-	echo "${clusterSize} Node Cluster, over ${#CLUSTER_MACHINES[@]} box, (${jvmsPerBox} Jvm's per box, ${nodesPerJvm} Nodes per Jvm), ${totalProducers} Load producers (over ${#LOAD_MACHINES[@]} box, ${clientsPerBox} per box)" > ${outDir}/info.txt
+	echo "${clusterSize} Node Cluster, over ${#CLUSTER_MACHINES[@]} box ${CLUSTER_MACHINES[@]}, (${jvmsPerBox} Jvm's per box, ${nodesPerJvm} Nodes per Jvm), ${totalProducers} Load producers (over ${#LOAD_MACHINES[@]} box ${LOAD_MACHINES[@]}, ${clientsPerBox} per box)" > ${outDir}/info.txt
 }
 
 function combineResults {
     outDir=$1
     version=$2
 
-    java -jar processresults/target/processResults-0.1.4.jar "merge" ${outDir}/${version} "runResult"  ${version} > ${outDir}/${version}/temp.csv
-    java -jar processresults/target/processResults-0.1.4.jar "merge" ${outDir}/${version} "loadResult" ${version} > ${outDir}/${version}/result.csv
+    java -jar ../processresults/target/processResults-0.1.4.jar "merge" ${outDir}/${version} "runResult"  ${version} > ${outDir}/${version}/temp.csv
+    java -jar ../processresults/target/processResults-0.1.4.jar "merge" ${outDir}/${version} "loadResult" ${version} > ${outDir}/${version}/result.csv
 
     cat ${outDir}/${version}/temp.csv >>  ${outDir}/${version}/result.csv
     rm ${outDir}/${version}/temp.csv
@@ -314,7 +303,7 @@ function combineResults {
 function reportResults {
     outDir=$1
 
-    java -jar processresults/target/processResults-0.1.4.jar "combine" ${outDir} "result" > ${outDir}/report.csv
+    java -jar ../processresults/target/processResults-0.1.4.jar "combine" ${outDir} "result" > ${outDir}/report.csv
 }
 
 

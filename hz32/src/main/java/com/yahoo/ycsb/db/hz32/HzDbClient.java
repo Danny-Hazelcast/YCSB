@@ -56,8 +56,13 @@ public class HzDbClient extends DB {
             for(int i=0; i<nodesPerJVM; i++){
                 if(clientNodes){
 
+                    //A BIT OF A HACKY FIX fo the case a client in not running on the same box as the server nodes
                     ClientConfig config = new ClientConfig();
-                    config.getNetworkConfig().addAddress("192.168.2.102:5701"); //192.168.2.102:5701
+                    config.getNetworkConfig().addAddress("127.0.0.1:5701");
+                    config.getNetworkConfig().addAddress("192.168.2.101"+":"+5701);
+                    config.getNetworkConfig().addAddress("192.168.2.102"+":"+5701);
+                    config.getNetworkConfig().addAddress("192.168.2.103"+":"+5701);
+                    config.getNetworkConfig().addAddress("192.168.2.104"+":"+5701);
 
                     nodez.add(HazelcastClient.newHazelcastClient(config));
                 }else{
