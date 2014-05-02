@@ -57,7 +57,7 @@ public class HzDbClient extends DB {
                     ClientConfig config = new ClientConfig();
                     config.addAddress("127.0.0.1:5701");
                     config.addAddress("192.168.2.101" + ":" + 5701);
-                    config.addAddress("192.168.2.102"+":"+5701);
+                    config.addAddress("192.168.2.102" + ":" + 5701);
                     config.addAddress("192.168.2.103" + ":" + 5701);
                     config.addAddress("192.168.2.104" + ":" + 5701);
 
