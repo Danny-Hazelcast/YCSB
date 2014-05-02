@@ -302,8 +302,11 @@ function combineResults {
 
 function reportResults {
     outDir=$1
+    totalInserts=$2
+    totalOperations=$3
 
-    java -jar ../processresults/target/processResults-0.1.4.jar "combine" ${outDir} "result" > ${outDir}/report.csv
+
+    java -jar ../processresults/target/processResults-0.1.4.jar "combine" ${outDir} "result" ${totalInserts} ${totalOperations}  > ${outDir}/report.csv 2>${outDir}/errors.txt
 }
 
 

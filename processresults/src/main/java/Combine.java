@@ -1,5 +1,3 @@
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -15,21 +13,36 @@ import java.util.*;
 
 public class Combine {
 
-    public static ListMultimap<String, String> data = ArrayListMultimap.create();
+    //public static ListMultimap<String, String> data = ArrayListMultimap.create();
 
     public static Map<String, Double> versionedData = new HashMap();
     public static List<String> versions = new ArrayList<String>();
 
-    public static String[] oppType = {"[INSERT]", "[UPDATE]", "[READ]"};
+    public static String[] oppTypes = {"[INSERT]", "[UPDATE]", "[READ]"};
 
-    public static String version;
+
+    public static String[] oppIds = {"[OVERALL] RunTime(ms)",
+                                     "[OVERALL] Throughput(ops/sec)",
+                                     " Operations",
+                                     " Return=0",
+                                     " AverageLatency(us)",
+                                     " MinLatency(us)",
+                                     " MaxLatency(us)",
+                                     " 95thPercentileLatency(ms)",
+                                     " 99thPercentileLatency(ms)"};
+
+
     public static String dir;
+    public static double targetInserts;
+    public static double targetOpps;
 
     public Combine(String args[]) throws IOException {
 
         dir = args[1];
         String fileNames = args[2];
 
+        targetInserts = Double.parseDouble( args[3] );
+        targetOpps  = Double.parseDouble( args[4] );
 
         Collection<File> files = getfileNames( dir, fileNames );
 
@@ -52,8 +65,9 @@ public class Combine {
         makeChart(" 95thPercentileLatency(ms)", "95th Percentile Latency (ms)", "ms", "95thPercentileLatency");
         makeChart(" 99thPercentileLatency(ms)", "99th Percentile Latency (ms)", "ms", "99thPercentileLatency");
 
-
         printdata();
+
+        printPossibleErrors();
     }
 
     public static Collection<File> getfileNames(String path, String names){
@@ -69,85 +83,58 @@ public class Combine {
     }
 
     public static void addDataFrom(BufferedReader in) throws IOException {
-        String line;
-        while ( (line = in.readLine()) !=null ) {
+        String line = in.readLine();
 
-            StringTokenizer st = new StringTokenizer(line, ",", false);
-            String key1 = st.nextToken();
-            String value = st.nextToken();
+        StringTokenizer st = new StringTokenizer(line, ",", false);
+        String versionKey = st.nextToken();
+        String version = st.nextToken();
 
-            data.put(key1, value);
-        }
-
-        String versionKey = "[version]";
-        String version = data.get(versionKey).get(data.get(versionKey).size()-1);
         versions.add(version);
 
-        for(String k : data.keySet()){
+        while ( (line = in.readLine()) !=null ) {
 
-            if(!k.equals(versionKey)){
+            st = new StringTokenizer(line, ",", false);
+            String key = st.nextToken();
+            String value = st.nextToken();
 
-                String value = data.get(k).get(data.get(k).size()-1);
-
-                if(versionedData.containsKey(version+k)){
-                    System.out.println("!!!!!   BROKENooooooooooo ==="+ version+k );
-                    System.exit(1);
-                }
-
-                versionedData.put(version+k, Double.parseDouble(value));
-            }
+            versionedData.put(version+key, Double.parseDouble(value));
         }
     }
 
     public static void printdata(){
 
-        String key = "[version]";
-        System.out.println(key+", "+data.get(key));
+        System.out.print("[version]");
+        for(String version : versions){
+            System.out.print(","+version);
+        }
+        System.out.println();
 
-        for(String type : oppType){
-            printData(type);
+
+        for(String type : oppTypes){
+            for(String id : oppIds){
+
+                printDataLine(type, id);
+            }
+
+            for(int i=0; i<1000; i++){
+                printDataLine(type, " "+i);
+            }
+
+            printDataLine(type, " >1000");
         }
     }
 
-    public static void printData(String type){
 
+    public static void printDataLine(String type, String id){
 
-        String key = type+"[OVERALL] RunTime(ms)";
-        System.out.println(key+", "+data.get(key));
+        System.out.print(type+id);
+        for(String version : versions){
 
-        key = type+"[OVERALL] Throughput(ops/sec)";
-        System.out.println(key+", "+data.get(key));
+            String key = version + type + id;
 
-
-        key = type+" Operations";
-        System.out.println(key+", "+data.get(key));
-
-        key = type+" Return=0";
-        System.out.println(key+", "+data.get(key));
-
-        key = type+" AverageLatency(us)";
-        System.out.println(key+", "+data.get(key));
-
-        key = type+" MinLatency(us)";
-        System.out.println(key+", "+data.get(key));
-
-        key = type+" MaxLatency(us)";
-        System.out.println(key+", "+data.get(key));
-
-        key = type+" 95thPercentileLatency(ms)";
-        System.out.println(key+", "+data.get(key));
-
-        key = type+" 99thPercentileLatency(ms)";
-        System.out.println(key+", "+data.get(key));
-
-
-        for(int i=0; i<1000; i++){
-            key = type+" "+i;
-            System.out.println(key+", "+data.get(key));
+            System.out.print(", "+versionedData.get(key));
         }
-
-        key = type+" >1000";
-        System.out.println(key+", "+data.get(key));
+        System.out.println();
     }
 
 
@@ -156,11 +143,13 @@ public class Combine {
         DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 
         for(String version : versions){
-            for(String type : oppType){
+            for(String type : oppTypes){
 
                 String key = version+type+dataKey;
-                double val = versionedData.get(key);
-                dataSet.setValue(val, type, version);
+                Double val = versionedData.get(key);
+                if(val!=null){
+                    dataSet.setValue(val, type, version);
+                }
             }
         }
 
@@ -178,6 +167,47 @@ public class Combine {
         try {
             ChartUtilities.saveChartAsPNG(new File(dir+"/"+fileName+".png"), objChart, 500, 400);
         } catch (IOException e) {}
+    }
+
+
+    public static void printPossibleErrors(){
+
+        for(String version : versions){
+
+            String insertOppskey = version+"[INSERT]"+" Operations";
+            Double totalInserts = versionedData.get(insertOppskey);
+
+            if(totalInserts==null ||totalInserts != targetInserts){
+                System.err.println(version+" did "+totalInserts+" "+insertOppskey+" out of "+targetInserts);
+            }
+
+            String updateOppskey = version+"[UPDATE]"+" Operations";
+            Double totalUpdate = versionedData.get(updateOppskey);
+
+            String readOppskey = version+"[READ]"+" Operations";
+            Double totalRead = versionedData.get(readOppskey);
+
+
+            if(totalUpdate==null || totalRead==null || totalUpdate + totalRead != targetOpps){
+                System.err.println(version+" did not meet target operations count of "+targetOpps+" ( [UPDATE]="+totalUpdate+" [READ]="+totalRead+" )" );
+            }
+
+        }
+
+        for(String version : versions){
+            for(String type : oppTypes){
+
+                String InsertOppskey = version+type+" Operations";
+                String InsertOppsOkkey = version+type+" Return=0";
+
+                Double totalOpps = versionedData.get(InsertOppskey);
+                Double checkedOpps = versionedData.get(InsertOppsOkkey);
+
+                if(totalOpps==null || checkedOpps==null || Math.round(totalOpps) != Math.round(checkedOpps) ){
+                    System.err.println(version+" did "+totalOpps+" "+InsertOppskey+" only "+checkedOpps+" passed");
+                }
+            }
+        }
     }
 
 }
