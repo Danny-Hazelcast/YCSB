@@ -34,7 +34,6 @@ workloadZ="workloadZ"
 #=====================================================================
 
 
-
 #===SYSTEMS VARIABLES edit this list to control which version to test======
 #
 # A list of systems to be tested
