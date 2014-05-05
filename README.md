@@ -62,6 +62,12 @@ Getting Started
         DB_CLIENTS_PER_BOX
             each machine can run multiple DbClients
 
+        NODES_PER_DB_CLIENT
+            number of nodes to be started in each DBClient
+
+        CLIENT_NODE
+            boolean value showing type of nodes to be started in each DBClient, client or cluster member
+
         INSERTS_PER_DB_CLIENT
             How much load each DBClient will produce in the "LOAD" phase of YCSB
 

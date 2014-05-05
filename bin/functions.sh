@@ -309,6 +309,20 @@ function reportResults {
     java -jar ../processresults/target/processResults-0.1.4.jar "combine" ${outDir} "result" ${totalInserts} ${totalOperations}  > ${outDir}/report.csv 2>${outDir}/errors.txt
 }
 
+function createPropertisFile {
+    outDir=$1
+    fileName=$2
+
+    for box in ${LOAD_MACHINES[@]}
+    do
+        address=$(address ${box} )
+	    port=$( port ${box} )
+
+        ssh ${USER}@${address} -p ${port} "echo 'hazelcastDBClient.nodesPerJVM = ${NODES_PER_DB_CLIENT}
+        hazelcastDbClient.clientNodes = ${CLIENT_NODE}
+        hazelcastDbClient.clusterIPList = ${CLUSTER_MACHINES[@]}' > ${BASE_DIR}/${fileName}"
+    done
+}
 
 function killAllJava {
 

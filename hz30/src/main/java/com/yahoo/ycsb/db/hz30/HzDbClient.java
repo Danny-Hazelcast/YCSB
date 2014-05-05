@@ -39,13 +39,9 @@ public class HzDbClient extends DB {
         if(doInit.compareAndSet(true, false)){
 
             Properties prop = getProperties();
-
-            String property = prop.getProperty("recordcount", "1");
-            System.err.println("==>> "+property );
-
-
             String nodesPerJVM_str = prop.getProperty("hazelcastDBClient.nodesPerJVM", "1");
             String clientNodes_str = prop.getProperty("hazelcastDbClient.clientNodes", "true");
+            String clusterIps = prop.getProperty("hazelcastDbClient.clusterIPList", "");
 
             nodesPerJVM = Integer.parseInt(nodesPerJVM_str);
             clientNodes = Boolean.parseBoolean(clientNodes_str);
@@ -53,21 +49,20 @@ public class HzDbClient extends DB {
             for(int i=0; i<nodesPerJVM; i++){
                 if(clientNodes){
 
-                    //A BIT OF A HACKY FIX fo the case a client in not running on the same box as the server nodes
                     ClientConfig config = new ClientConfig();
-                    config.addAddress("127.0.0.1:5701");
-                    config.addAddress("192.168.2.101" + ":" + 5701);
-                    config.addAddress("192.168.2.102"+":"+5701);
-                    config.addAddress("192.168.2.103" + ":" + 5701);
-                    config.addAddress("192.168.2.104" + ":" + 5701);
+
+                    StringTokenizer st = new StringTokenizer(clusterIps, " ", false);
+                    while(st.hasMoreTokens()){
+                        String ip = st.nextToken();
+
+                        config.addAddress(ip);
+                    }
 
                     nodez.add(HazelcastClient.newHazelcastClient(config));
                 }else{
                     nodez.add(Hazelcast.newHazelcastInstance());
                 }
             }
-
-
 
             initFinished.countDown();
             return;

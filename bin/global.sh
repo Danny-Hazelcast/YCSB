@@ -47,7 +47,7 @@ SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}")
 #===CLUSTER VARIABLES edit these variables to control how the cluster is formed ===
 #
 # List of boxes that will run the cluster nodes
-CLUSTER_MACHINES=("${localhost}")
+CLUSTER_MACHINES=("${box1}" "${box2}")
 
 # number of jvms to start on each box in CLUSTER_MACHINES
 CLUSTER_JVMS_PER_BOX=2
@@ -62,10 +62,17 @@ CLUSTER_NODES_PER_JVM=1
 #===LOAD PRODUCER VARIABLES edit to control where and how YCSB will run==========================
 #
 # A list of boxes that will run the load producing DBClients of the YCSB system
-LOAD_MACHINES=("${localhost}")
+LOAD_MACHINES=("${box3}" "${box4}")
+#LOAD_MACHINES=("${localhost}")
 
 # number of DBClients to be started on each box in LOAD_MACHINES
 DB_CLIENTS_PER_BOX=2
+
+# number of nodes to be started in each DBClient
+NODES_PER_DB_CLIENT=1
+
+# type of nodes to be started in each DBClient, client or cluster member
+CLIENT_NODE="true"
 
 # How much load each DBClient will produce in the LOAD phase of the YCSB system
 INSERTS_PER_DB_CLIENT=1000
