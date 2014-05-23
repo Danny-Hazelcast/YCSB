@@ -25,6 +25,10 @@ hz26="hz26"
 hz30="hz30"
 hz31="hz31"
 hz32="hz32"
+hz321="hz321"
+hz322="hz322SnapShot"
+
+
 gg="gridgain"
 
 #a choice of workload files in the workloads directory of this project
@@ -37,7 +41,8 @@ workloadZ="workloadZ"
 #===SYSTEMS VARIABLES edit this list to control which version to test======
 #
 # A list of systems to be tested
-SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}")
+#SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}")
+SYSTEMS=("${hz321}" "${hz322}")
 #
 #=========================================================
 

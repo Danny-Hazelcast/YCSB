@@ -1,4 +1,4 @@
-package com.yahoo.ycsb.db.hz32;
+package com.yahoo.ycsb.db.hz322SnapShot;
 
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
@@ -10,12 +10,9 @@ import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.StringByteIterator;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A database interface layer for Hazelcast.

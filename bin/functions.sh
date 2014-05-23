@@ -47,7 +47,7 @@ function install {
 	ssh ${USER}@${address} -p ${port} "rm -fr ${BASE_DIR}"
 	ssh ${USER}@${address} -p ${port} "mkdir ${BASE_DIR}"
 
-	scp -P ${port} ${zipFileName} ${USER}@${address}:${BASE_DIR}/${zipFileName}
+	scp -r -P ${port} ${zipFileName} ${USER}@${address}:${BASE_DIR}/${zipFileName}
 	echo Unzipping ${zipFileName}
 	ssh ${USER}@${address} -p ${port}  "unzip -q ${BASE_DIR}/${zipFileName} -d ${BASE_DIR}"
 

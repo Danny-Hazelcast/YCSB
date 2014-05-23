@@ -7,8 +7,8 @@
         <version>0.1.4</version>
     </parent>
 
-    <artifactId>hz32-binding</artifactId>
-    <name>Hazelcast 3.2 DB Binding</name>
+    <artifactId>hz321-binding</artifactId>
+    <name>Hazelcast 3.2.1 DB Binding</name>
     <packaging>jar</packaging>
 
     <dependencies>

@@ -41,10 +41,14 @@ DATABASES = {
     "orientdb"     : "com.yahoo.ycsb.db.OrientDBClient",
     "redis"        : "com.yahoo.ycsb.db.RedisClient", 
     "voldemort"    : "com.yahoo.ycsb.db.VoldemortClient",
-    "hz26"        : "com.yahoo.ycsb.db.hz26.HzDbClient",
-    "hz30"        : "com.yahoo.ycsb.db.hz30.HzDbClient",
-    "hz31"        : "com.yahoo.ycsb.db.hz31.HzDbClient",
-    "hz32"        : "com.yahoo.ycsb.db.hz32.HzDbClient",
+
+    "hz26"         : "com.yahoo.ycsb.db.hz26.HzDbClient",
+    "hz30"         : "com.yahoo.ycsb.db.hz30.HzDbClient",
+    "hz31"         : "com.yahoo.ycsb.db.hz31.HzDbClient",
+    "hz32"         : "com.yahoo.ycsb.db.hz32.HzDbClient",
+    "hz321"        : "com.yahoo.ycsb.db.hz321.HzDbClient",
+    "hz322SnapShot": "com.yahoo.ycsb.db.hz322SnapShot.HzDbClient",
+
     "infini2"     : "com.yahoo.ycsb.db.infini2.InfinispanClient",
     "gridgain"    : "com.yahoo.ycsb.db.gridgain.GridGainDbClient"
 }
