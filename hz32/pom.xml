@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-all</artifactId>
-            <version>3.2.1</version>
+            <version>3.2</version>
         </dependency>
         <dependency>
             <groupId>com.yahoo.ycsb</groupId>
@@ -33,7 +33,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.yahoo.ycsb.db.hz321.HzCluster</mainClass>
+                            <mainClass>com.yahoo.ycsb.db.hz32.HzCluster</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

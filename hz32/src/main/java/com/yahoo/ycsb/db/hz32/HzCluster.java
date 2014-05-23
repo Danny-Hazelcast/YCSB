@@ -1,4 +1,4 @@
-package com.yahoo.ycsb.db.hz321;
+package com.yahoo.ycsb.db.hz32;
 
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;

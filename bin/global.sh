@@ -41,8 +41,8 @@ workloadZ="workloadZ"
 #===SYSTEMS VARIABLES edit this list to control which version to test======
 #
 # A list of systems to be tested
-#SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}")
-SYSTEMS=("${hz321}" "${hz322}")
+SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}")
+#SYSTEMS=("${hz321}" "${hz322}")
 #
 #=========================================================
 

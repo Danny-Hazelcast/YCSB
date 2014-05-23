@@ -165,7 +165,7 @@ public class Combine {
         );
 
         try {
-            ChartUtilities.saveChartAsPNG(new File(dir+"/"+fileName+".png"), objChart, 500, 400);
+            ChartUtilities.saveChartAsPNG(new File(dir+"/"+fileName+".png"), objChart, 1024, 800);
         } catch (IOException e) {}
     }
 
