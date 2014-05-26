@@ -41,8 +41,8 @@ workloadZ="workloadZ"
 #===SYSTEMS VARIABLES edit this list to control which version to test======
 #
 # A list of systems to be tested
-#SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}")
-SYSTEMS=("${hz26}")
+SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}")
+#SYSTEMS=("${hz26}")
 #
 #=========================================================
 
@@ -81,10 +81,10 @@ NODES_PER_DB_CLIENT=1
 CLIENT_NODE="true"
 
 # How much load each DBClient will produce in the LOAD phase of the YCSB system
-INSERTS_PER_DB_CLIENT=1000
+INSERTS_PER_DB_CLIENT=10000
 
 # How much load each DBClient will produce in the TRANSACTION phase of the YCSB system
-OPERATIONS_PER_DB_CLIENT=1000
+OPERATIONS_PER_DB_CLIENT=10000
 
 # the name of the YCSB workload file that YCSB will use to control the TRANSACTION phase controls the update/read split, request distribution,
 WORKLOAD=${workloadZ}
