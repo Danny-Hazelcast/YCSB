@@ -26,12 +26,14 @@ do
         transactionPhase ${VERSION} ${DB_CLIENTS_PER_BOX} ${INSERTS_PER_DB_CLIENT} ${OPERATIONS_PER_DB_CLIENT} "dbclient.properties" ${WORKLOAD}
 
         echo "====== Getting results ========"
+
         downLoadResults ${VERSION} ${DB_CLIENTS_PER_BOX} ${WORKLOAD} ${OUTPUT_DIR}
         combineResults ${OUTPUT_DIR} ${VERSION}
     fi
 
     echo "====== Killing phase ========"
     killAllJava
+    sleep 5
 done
 
 

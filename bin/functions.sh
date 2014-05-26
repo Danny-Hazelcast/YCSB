@@ -106,6 +106,8 @@ function initCluster {
 
             i=$[$i+1]
             count=$[$count+1]
+
+            sleep 5
         done
     done
     echo "SOME THING REALLY WENT WRONG HEAR"
@@ -134,7 +136,7 @@ function loadPhase {
         i=0
         while [ $i -lt $clientsPerBox ]
         do
-            ssh ${USER}@${address} -p ${port} "./${BASE_DIR}/bin/ycsb load ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p insertstart=${startIdx} -p insertcount=${insertsPerClient} -p recordcount=${totalRecords} -p operationcount=${operationPerDbClient} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-loadResult.txt 2>${BASE_DIR}/${version}/dbClient${i}Load.out" &
+            ssh ${USER}@${address} -p ${port} "sleep 30 && ./${BASE_DIR}/bin/ycsb load ${version} -P ${BASE_DIR}/workloads/${workload} -P ${BASE_DIR}/${clientProps} -p insertstart=${startIdx} -p insertcount=${insertsPerClient} -p recordcount=${totalRecords} -p operationcount=${operationPerDbClient} -s > ${BASE_DIR}/${version}/dbClient${i}-${workload}-loadResult.txt 2>${BASE_DIR}/${version}/dbClient${i}Load.out" &
             pids+=($!)
             echo "Starting on ${box} DB-Client ${i} Load phase of ${workload} inserting ${insertsPerClient} for idx ${startIdx} version ${version}"
             startIdx=$[$startIdx+$insertsPerClient]

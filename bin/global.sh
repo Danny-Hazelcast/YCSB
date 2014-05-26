@@ -41,8 +41,8 @@ workloadZ="workloadZ"
 #===SYSTEMS VARIABLES edit this list to control which version to test======
 #
 # A list of systems to be tested
-SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}")
-#SYSTEMS=("${hz321}" "${hz322}")
+#SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}")
+SYSTEMS=("${hz26}")
 #
 #=========================================================
 
@@ -51,10 +51,12 @@ SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}")
 #===CLUSTER VARIABLES edit these variables to control how the cluster is formed ===
 #
 # List of boxes that will run the cluster nodes
-CLUSTER_MACHINES=("${localhost}")
+#CLUSTER_MACHINES=("${localhost}")
+CLUSTER_MACHINES=("${box1}" "${box2}")
+
 
 # number of jvms to start on each box in CLUSTER_MACHINES
-CLUSTER_JVMS_PER_BOX=2
+CLUSTER_JVMS_PER_BOX=4
 
 # number of nodes to be started in each JVM on each box
 CLUSTER_NODES_PER_JVM=1
@@ -66,11 +68,11 @@ CLUSTER_NODES_PER_JVM=1
 #===LOAD PRODUCER VARIABLES edit to control where and how YCSB will run==========================
 #
 # A list of boxes that will run the load producing DBClients of the YCSB system
-LOAD_MACHINES=("${localhost}")
 #LOAD_MACHINES=("${localhost}")
+LOAD_MACHINES=("${box3}" "${box4}")
 
 # number of DBClients to be started on each box in LOAD_MACHINES
-DB_CLIENTS_PER_BOX=2
+DB_CLIENTS_PER_BOX=10
 
 # number of nodes to be started in each DBClient
 NODES_PER_DB_CLIENT=1
