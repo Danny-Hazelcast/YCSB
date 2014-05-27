@@ -77,6 +77,14 @@ public class HzDbClient extends DB {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        if(!clientNodes){
+            try {
+                Thread.sleep(1000 * 60);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 	@Override

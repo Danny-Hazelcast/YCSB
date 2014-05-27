@@ -88,7 +88,7 @@ def find_jars(dir, database):
     for (dirpath, dirnames, filenames) in os.walk(dir):
         if dirpath.endswith("conf"):
             jars.append(dirpath)
-        for filename in filenames:
+        for filename in sorted(filenames):
             if filename.endswith(".jar") and \
                (filename.startswith("core") or \
                 filename.startswith(database.split("-")[0]) or \

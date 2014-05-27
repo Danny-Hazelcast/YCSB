@@ -19,8 +19,16 @@ do
 
     if [ ${?} == 0 ]; then
 
+        #CLIENT_NODE="true"
+        #createPropertisFile "../" ${PROP_FILE}
+
         echo "====== Load phase ========"
         loadPhase ${VERSION} ${DB_CLIENTS_PER_BOX} ${INSERTS_PER_DB_CLIENT} ${OPERATIONS_PER_DB_CLIENT} "dbclient.properties" ${WORKLOAD}
+
+
+        #CLIENT_NODE="false"
+        #createPropertisFile "../" ${PROP_FILE}
+
 
         echo "====== Transaction phase ========"
         transactionPhase ${VERSION} ${DB_CLIENTS_PER_BOX} ${INSERTS_PER_DB_CLIENT} ${OPERATIONS_PER_DB_CLIENT} "dbclient.properties" ${WORKLOAD}
