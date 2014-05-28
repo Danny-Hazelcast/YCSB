@@ -91,9 +91,10 @@ def find_jars(dir, database):
         for filename in sorted(filenames):
             if filename.endswith(".jar") and \
                (filename.startswith("core") or \
-                filename.startswith(database.split("-")[0]) or \
+                filename.startswith(database+"-binding") or \
                 not "binding" in filename):
                 jars.append(os.path.join(dirpath, filename))
+                print filename
     return jars
 
 def get_ycsb_home():
