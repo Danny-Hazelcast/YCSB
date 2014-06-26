@@ -48,6 +48,8 @@ DATABASES = {
     "hz32"         : "com.yahoo.ycsb.db.hz32.HzDbClient",
     "hz321"        : "com.yahoo.ycsb.db.hz321.HzDbClient",
     "hz322SnapShot": "com.yahoo.ycsb.db.hz322SnapShot.HzDbClient",
+    "hz33rc1"      : "com.yahoo.ycsb.db.hz33rc1.HzDbClient",
+
 
     "infini2"     : "com.yahoo.ycsb.db.infini2.InfinispanClient",
     "gridgain"    : "com.yahoo.ycsb.db.gridgain.GridGainDbClient"

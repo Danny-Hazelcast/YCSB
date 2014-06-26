@@ -77,6 +77,7 @@
     <module>voldemort</module>
     <module>distribution</module>
 
+    <module>hz33rc1</module>
     <module>Hz322SnapShot</module>
     <module>Hz321</module>
     <module>Hz32</module>
