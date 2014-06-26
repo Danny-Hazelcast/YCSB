@@ -15,6 +15,8 @@ public class HzCluster {
 
     public static void main(String args[]){
 
+        System.out.println("args = "+args);
+
         if(args!=null && args.length > 0){
             System.err.println("nodesPerJvm="+args[0]);
             nodesPerJvm = Integer.parseInt(args[0]);

@@ -7,7 +7,7 @@
         <version>0.1.4</version>
     </parent>
 
-    <artifactId>hz33-binding</artifactId>
+    <artifactId>hz33rc1-binding</artifactId>
     <name>Hazelcast 3.3 RC1 DB Binding</name>
     <packaging>jar</packaging>
 
