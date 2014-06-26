@@ -49,7 +49,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.yahoo.ycsb.db.hz322SnapShot.HzCluster</mainClass>
+                            <mainClass>com.yahoo.ycsb.db.hz33rc1.HzCluster</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
