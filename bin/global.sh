@@ -27,6 +27,7 @@ hz31="hz31"
 hz32="hz32"
 hz321="hz321"
 hz322="hz322SnapShot"
+hz33="hz33rc1"
 
 
 gg="gridgain"
@@ -41,7 +42,7 @@ workloadZ="workloadZ"
 #===SYSTEMS VARIABLES edit this list to control which version to test======
 #
 # A list of systems to be tested
-SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}")
+SYSTEMS=("${gg}" "${hz26}" "${hz30}" "${hz31}" "${hz32}" "${hz321}" "${hz322}" "${hz33}")
 #SYSTEMS=("${hz31}" "${hz32}")
 #
 #=========================================================
